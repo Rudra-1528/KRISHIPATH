@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
+
+:root {
+    --primary-green: #2d5a27;
+    --earth-brown: #5d4037;
+    --soft-cream: #f4f1ea;
+    /* This creates the Green-to-Brown fade seen in your image */
+    --sidebar-gradient: linear-gradient(180deg, #1e3b1a 0%, #2d5a27 40%, #5d4037 100%);
+}
+
+body {
+    background-color: var(--soft-cream);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Smooth Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #bbb; border-radius: 10px; }
