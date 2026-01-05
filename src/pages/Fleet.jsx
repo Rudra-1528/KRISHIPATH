@@ -12,8 +12,8 @@ const Fleet = () => {
     { 
       id: "VAC13143", 
       status: "Moving", 
-      driver: "Ramesh Kumar", 
-      phone: "+919876543210", 
+      driver: "Rudra Pratap", 
+      phone: "+919580214142", 
       location: "Mumbai - Nashik Hwy", 
       battery: 85, 
       signal: "Strong",
@@ -23,8 +23,8 @@ const Fleet = () => {
     { 
         id: "GJ-01-LIVE",  // <--- HERO TRUCK
         status: "Moving", 
-        driver: "Rudra Pratap", // <--- YOUR NAME
-        phone: "+918777264085", // <--- YOUR REAL NUMBER
+        driver: "Rohit sharma", // <--- YOUR NAME
+        phone: "+916204773940", // <--- YOUR REAL NUMBER
         location: "Lavad, Gujarat", 
         battery: 85, 
         signal: "Strong",
@@ -34,8 +34,8 @@ const Fleet = () => {
     { 
       id: "MH-12-9988", 
       status: "Stopped", 
-      driver: "Suresh Patel", 
-      phone: "+919123456789", 
+      driver: "Shaurya Mudgal", 
+      phone: "+919354937688", 
       location: "Pune Warehouse", 
       battery: 42, 
       signal: "Weak",
