@@ -24,7 +24,7 @@ const Fleet = () => {
         id: "GJ-01-LIVE",  // <--- HERO TRUCK
         status: "Moving", 
         driver: "Rudra Pratap", // <--- YOUR NAME
-        phone: "+919876543210", // <--- YOUR REAL NUMBER
+        phone: "+918777264085", // <--- YOUR REAL NUMBER
         location: "Lavad, Gujarat", 
         battery: 85, 
         signal: "Strong",
