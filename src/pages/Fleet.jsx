@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Search, Phone, User, Battery, Signal, MapPin, Truck } from 'lucide-react';
+import { translations } from '../translations';
 
 const Fleet = () => {
+  const { lang, isMobile } = useOutletContext(); 
+  const t = translations.menu[lang] || translations.menu['en']; // Basic translation fallback
+
   // --- MOCK FLEET DATA ---
-  // In a real app, you would fetch this from Firebase too.
   const [trucks] = useState([
     { 
       id: "VAC13143", 
       status: "Moving", 
       driver: "Ramesh Kumar", 
-      phone: "+91 98765 43210", 
+      phone: "+919876543210", 
       location: "Mumbai - Nashik Hwy", 
       battery: 85, 
       signal: "Strong",
@@ -17,10 +21,10 @@ const Fleet = () => {
       img: "https://randomuser.me/api/portraits/men/32.jpg"
     },
     { 
-        id: "GJ-01-LIVE",  // <--- MATCH THIS ID EVERYWHERE
+        id: "GJ-01-LIVE",  // <--- HERO TRUCK
         status: "Moving", 
-        driver: "Rudra Pratap", // <--- YOUR NAME / TEAMMATE NAME
-        phone: "+919876543210", // <--- PUT REAL PHONE NUMBER HERE (No spaces)
+        driver: "Rudra Pratap", // <--- YOUR NAME
+        phone: "+919876543210", // <--- YOUR REAL NUMBER
         location: "Lavad, Gujarat", 
         battery: 85, 
         signal: "Strong",
@@ -31,7 +35,7 @@ const Fleet = () => {
       id: "MH-12-9988", 
       status: "Stopped", 
       driver: "Suresh Patel", 
-      phone: "+91 91234 56789", 
+      phone: "+919123456789", 
       location: "Pune Warehouse", 
       battery: 42, 
       signal: "Weak",
@@ -42,7 +46,7 @@ const Fleet = () => {
       id: "GJ-05-1122", 
       status: "At Risk", 
       driver: "Vikram Singh", 
-      phone: "+91 99887 77665", 
+      phone: "+919988777665", 
       location: "Surat GIDC", 
       battery: 12, 
       signal: "No Signal",
@@ -53,7 +57,7 @@ const Fleet = () => {
       id: "MH-04-5544", 
       status: "Moving", 
       driver: "Amit Sharma", 
-      phone: "+91 90000 11111", 
+      phone: "+919000011111", 
       location: "Thane Checkpost", 
       battery: 92, 
       signal: "Strong",
@@ -64,9 +68,13 @@ const Fleet = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
 
+  // --- THE REAL CALLING FUNCTION ---
   const handleCall = (name, number) => {
-    alert(`Calling ${name} at ${number}...`);
-    // On a real phone, this would open the dialer: window.location.href = `tel:${number}`;
+    // 1. Remove spaces from number just in case (e.g., "+91 987..." -> "+91987...")
+    const cleanNumber = number.replace(/\s/g, '');
+    
+    // 2. Open the Phone Dialer
+    window.location.href = `tel:${cleanNumber}`;
   };
 
   // Filter logic
@@ -81,7 +89,7 @@ const Fleet = () => {
         {/* --- HEADER & SEARCH --- */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
             <div>
-                <h1 style={{ margin: 0, fontSize: '24px', color: '#1b5e20' }}>Live Fleet Status</h1>
+                <h1 style={{ margin: 0, fontSize: isMobile ? '20px' : '24px', color: '#1b5e20' }}>Live Fleet Status</h1>
                 <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '14px' }}>
                     Manage drivers and vehicle health.
                 </p>
@@ -107,7 +115,7 @@ const Fleet = () => {
         </div>
 
         {/* --- TRUCK GRID --- */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', overflowY: 'auto', paddingBottom: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', overflowY: 'auto', paddingBottom: '20px' }}>
             
             {filteredTrucks.map(truck => (
                 <div key={truck.id} style={{ background: 'white', borderRadius: '15px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderTop: truck.status === 'At Risk' ? '4px solid #d32f2f' : '4px solid #2e7d32' }}>
