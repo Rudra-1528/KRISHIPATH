@@ -8,30 +8,29 @@ const RoutingMachine = ({ start, end }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || !start || !end) return;
 
     const routingControl = L.Routing.control({
       waypoints: [
-        L.latLng(start[0], start[1]), // Start (Truck Location)
-        L.latLng(end[0], end[1])      // End (Warehouse/Destination)
+        L.latLng(start[0], start[1]), // Truck Location
+        L.latLng(end[0], end[1])      // Destination
       ],
-      routeWhileDragging: false,
-      addWaypoints: false,            // Disable adding new points
-      draggableWaypoints: false,      // Disable dragging
-      fitSelectedRoutes: false,       // Don't auto-zoom drastically
-      showAlternatives: false,        // Just one route
-      createMarker: function() { return null; }, // HIDE default markers (we use our own)
       lineOptions: {
-        styles: [{ color: "#004d40", weight: 4, opacity: 0.7 }] // Dark Green Route Line
-      }
+        styles: [{ color: "#2e7d32", weight: 6, opacity: 0.8 }] // Professional Green Route
+      },
+      show: false,             // Hide text instructions
+      addWaypoints: false,     // Disable user dragging
+      routeWhileDragging: false,
+      fitSelectedRoutes: true, // Auto-zoom to fit the path
+      
+      // CRITICAL: We return null here so the routing machine adds NO icons.
+      // We will add our own beautiful Truck Icons in the Dashboard file.
+      createMarker: function() { return null; } 
     }).addTo(map);
 
-    // Remove the routing controls box (the white text box on top right)
-    // We only want the visual line.
-    routingControl._container.style.display = "none";
-
     return () => map.removeControl(routingControl);
-  }, [map, start, end]);
+
+  }, [map, start, end]); // Re-draws whenever start/end changes
 
   return null;
 };

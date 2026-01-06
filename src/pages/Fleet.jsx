@@ -1,84 +1,130 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Search, Phone, User, Battery, Signal, MapPin, Truck } from 'lucide-react';
+import { Search, Phone, User, Battery, Signal, MapPin, Truck, Map } from 'lucide-react';
+import { collection, onSnapshot } from "firebase/firestore"; 
+import { db } from '../firebase'; 
 import { translations } from '../translations';
 
 const Fleet = () => {
   const { lang, isMobile } = useOutletContext(); 
-  const t = translations.menu[lang] || translations.menu['en']; // Basic translation fallback
+  const t = translations.menu[lang] || translations.menu['en'];
 
-  // --- MOCK FLEET DATA ---
-  const [trucks] = useState([
+  const [searchTerm, setSearchTerm] = useState("");
+  const [lastUpdate, setLastUpdate] = useState(Date.now()); 
+
+  // --- 1. STATIC DATA (Added 'route' field) ---
+  const staticTrucks = [
     { 
       id: "VAC13143", 
-      status: "Moving", 
       driver: "Rudra Pratap", 
+      driverId: "DRV-101",
       phone: "+919580214142", 
-      location: "Mumbai - Nashik Hwy", 
-      battery: 85, 
-      signal: "Strong",
-      cargo: "Tomatoes",
+      location: "19.9975, 73.7898",
+      route: "Mumbai → Nashik", // <--- ADDED ROUTE
       img: "https://randomuser.me/api/portraits/men/32.jpg"
     },
     { 
-        id: "GJ-01-LIVE",  // <--- HERO TRUCK
-        status: "Moving", 
-        driver: "Rohit sharma", // <--- YOUR NAME
-        phone: "+916204773940", // <--- YOUR REAL NUMBER
-        location: "Lavad, Gujarat", 
-        battery: 85, 
-        signal: "Strong",
-        cargo: "Medical Supplies",
-        img: "https://randomuser.me/api/portraits/men/32.jpg"
-    },
-    { 
       id: "MH-12-9988", 
-      status: "Stopped", 
       driver: "Shaurya Mudgal", 
+      driverId: "DRV-102",
       phone: "+919354937688", 
-      location: "Pune Warehouse", 
-      battery: 42, 
-      signal: "Weak",
-      cargo: "Onions",
+      location: "18.5204, 73.8567",
+      route: "Pune → Mumbai", // <--- ADDED ROUTE
       img: "https://randomuser.me/api/portraits/men/45.jpg"
     },
     { 
       id: "GJ-05-1122", 
-      status: "At Risk", 
       driver: "Vikram Singh", 
+      driverId: "DRV-103",
       phone: "+919988777665", 
-      location: "Surat GIDC", 
-      battery: 12, 
-      signal: "No Signal",
-      cargo: "Milk",
+      location: "21.1702, 72.8311",
+      route: "Surat → Vadodara", // <--- ADDED ROUTE
       img: "https://randomuser.me/api/portraits/men/11.jpg"
     },
     { 
       id: "MH-04-5544", 
-      status: "Moving", 
       driver: "Amit Sharma", 
+      driverId: "DRV-104",
       phone: "+919000011111", 
-      location: "Thane Checkpost", 
-      battery: 92, 
-      signal: "Strong",
-      cargo: "Vaccines",
+      location: "19.2183, 72.9781",
+      route: "Thane → Pune", // <--- ADDED ROUTE
       img: "https://randomuser.me/api/portraits/men/64.jpg"
     },
-  ]);
+  ];
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [fleetData, setFleetData] = useState([]);
 
-  // --- THE REAL CALLING FUNCTION ---
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "shipments"), (snapshot) => {
+      
+      const liveData = snapshot.docs.reduce((acc, doc) => {
+        acc[doc.data().truck_id] = doc.data();
+        return acc;
+      }, {});
+
+      // A. Process Static Trucks
+      const mergedStatic = staticTrucks.map(t => {
+        const live = liveData[t.id];
+        
+        let status = "Stopped";
+        let loc = t.location; 
+        let bat = 0;
+        let sig = "No Signal";
+
+        if (live) {
+           status = live.status || "Moving";
+           if (live.location) {
+             loc = `${live.location.lat.toFixed(4)}, ${live.location.lng.toFixed(4)}`;
+           }
+           bat = 85; 
+           sig = "Strong";
+        }
+        
+        return { ...t, status, location: loc, battery: bat, signal: sig };
+      });
+
+      // B. Handle HERO TRUCK (GJ-01-LIVE)
+      const heroLive = liveData["GJ-01-LIVE"];
+      if (heroLive) setLastUpdate(Date.now());
+
+      const heroTruck = {
+        id: "GJ-01-LIVE",
+        driver: "Rohit sharma", 
+        driverId: "DRV-999",
+        phone: "+916204773940", 
+        img: "https://randomuser.me/api/portraits/men/32.jpg",
+        route: "Lavad → Gandhinagar", // <--- HERO ROUTE
+        
+        status: heroLive ? heroLive.status : "Signal Lost", 
+        location: heroLive && heroLive.location ? `${heroLive.location.lat.toFixed(4)}, ${heroLive.location.lng.toFixed(4)}` : "0.0000, 0.0000",
+        battery: heroLive ? 85 : 0,
+        signal: heroLive ? "Strong" : "Offline"
+      };
+
+      setFleetData([heroTruck, ...mergedStatic]);
+    });
+
+    // Check Offline Timeout
+    const interval = setInterval(() => {
+        if (Date.now() - lastUpdate > 15000) { 
+            setFleetData(prev => prev.map(t => {
+                if (t.id === "GJ-01-LIVE") {
+                    return { ...t, status: "Signal Lost", signal: "Offline", battery: 0, location: "23.0225, 72.5714" };
+                }
+                return t;
+            }));
+        }
+    }, 2000);
+
+    return () => { unsubscribe(); clearInterval(interval); };
+  }, [lastUpdate]);
+
   const handleCall = (name, number) => {
-    // 1. Remove spaces from number just in case (e.g., "+91 987..." -> "+91987...")
     const cleanNumber = number.replace(/\s/g, '');
-    
-    // 2. Open the Phone Dialer
     window.location.href = `tel:${cleanNumber}`;
   };
 
-  // Filter logic
-  const filteredTrucks = trucks.filter(t => 
+  const filteredTrucks = fleetData.filter(t => 
     t.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
     t.driver.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -86,94 +132,55 @@ const Fleet = () => {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
-        {/* --- HEADER & SEARCH --- */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
             <div>
                 <h1 style={{ margin: 0, fontSize: isMobile ? '20px' : '24px', color: '#1b5e20' }}>Live Fleet Status</h1>
-                <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '14px' }}>
-                    Manage drivers and vehicle health.
-                </p>
+                <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '14px' }}>Manage drivers and vehicle health.</p>
             </div>
-
             <div style={{ position: 'relative' }}>
                 <Search size={18} color="#888" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
-                <input 
-                    type="text" 
-                    placeholder="Search Driver or Truck ID..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ 
-                        padding: '12px 12px 12px 45px', 
-                        borderRadius: '10px', 
-                        border: '1px solid #ddd', 
-                        width: '280px',
-                        outline: 'none',
-                        fontSize: '14px'
-                    }}
-                />
+                <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ padding: '12px 12px 12px 45px', borderRadius: '10px', border: '1px solid #ddd', width: '280px', outline: 'none', fontSize: '14px' }} />
             </div>
         </div>
 
-        {/* --- TRUCK GRID --- */}
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', overflowY: 'auto', paddingBottom: '20px' }}>
-            
             {filteredTrucks.map(truck => (
-                <div key={truck.id} style={{ background: 'white', borderRadius: '15px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderTop: truck.status === 'At Risk' ? '4px solid #d32f2f' : '4px solid #2e7d32' }}>
+                <div key={truck.id} style={{ background: 'white', borderRadius: '15px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderTop: truck.status === 'Signal Lost' ? '4px solid #757575' : truck.status === 'At Risk' ? '4px solid #d32f2f' : '4px solid #2e7d32' }}>
                     
-                    {/* Top Row: Truck ID & Status Badge */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: '#333' }}>
-                            <Truck size={20} color="#004d40" />
-                            {truck.id}
-                        </div>
-                        <span style={{ 
-                            padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', 
-                            background: truck.status === 'At Risk' ? '#ffebee' : truck.status === 'Stopped' ? '#fff3e0' : '#e8f5e9',
-                            color: truck.status === 'At Risk' ? '#d32f2f' : truck.status === 'Stopped' ? '#ef6c00' : '#2e7d32'
-                        }}>
-                            {truck.status}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: '#333' }}><Truck size={20} color="#004d40" />{truck.id}</div>
+                        <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', background: truck.status === 'Signal Lost' ? '#eee' : truck.status === 'At Risk' ? '#ffebee' : '#e8f5e9', color: truck.status === 'Signal Lost' ? '#555' : truck.status === 'At Risk' ? '#d32f2f' : '#2e7d32' }}>{truck.status}</span>
                     </div>
 
-                    {/* Driver Info */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
                         <img src={truck.img} alt="Driver" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #eee' }} />
                         <div>
                             <div style={{ fontWeight: 'bold', fontSize: '15px' }}>{truck.driver}</div>
-                            <div style={{ fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <User size={12} /> ID: DRV-{Math.floor(Math.random()*1000)}
-                            </div>
+                            <div style={{ fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}><User size={12} /> ID: {truck.driverId}</div>
                         </div>
                     </div>
 
-                    {/* Tech Details (Battery / Location) */}
                     <div style={{ background: '#f9f9f9', padding: '15px', borderRadius: '10px', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: '#666', display: 'flex', gap: '6px' }}><MapPin size={16}/> Location</span>
-                            <span style={{ fontWeight: 'bold' }}>{truck.location}</span>
+                        {/* --- NEW ROUTE LINE --- */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', paddingBottom: '8px', marginBottom: '4px' }}>
+                            <span style={{ color: '#666', display: 'flex', gap: '6px' }}><Map size={16}/> Route</span>
+                            <span style={{ fontWeight: 'bold', color: '#1b5e20' }}>{truck.route}</span>
                         </div>
+                        
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: '#666', display: 'flex', gap: '6px' }}><Battery size={16}/> Battery</span>
-                            <span style={{ fontWeight: 'bold', color: truck.battery < 20 ? 'red' : 'green' }}>{truck.battery}%</span>
+                            <span style={{ color: '#666', display: 'flex', gap: '6px' }}><MapPin size={16}/> GPS</span>
+                            <span style={{ fontWeight: 'bold', fontFamily: 'monospace' }}>{truck.location}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: '#666', display: 'flex', gap: '6px' }}><Signal size={16}/> Signal</span>
-                            <span style={{ fontWeight: 'bold' }}>{truck.signal}</span>
-                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#666', display: 'flex', gap: '6px' }}><Battery size={16}/> Battery</span><span style={{ fontWeight: 'bold', color: truck.battery < 20 ? 'red' : 'green' }}>{truck.battery}%</span></div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#666', display: 'flex', gap: '6px' }}><Signal size={16}/> Signal</span><span style={{ fontWeight: 'bold', color: truck.signal === 'Offline' ? 'red' : 'green' }}>{truck.signal}</span></div>
                     </div>
 
-                    {/* Call Button */}
-                    <button 
-                        onClick={() => handleCall(truck.driver, truck.phone)}
-                        style={{ width: '100%', marginTop: '15px', padding: '12px', background: 'transparent', border: '1px solid #004d40', color: '#004d40', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                    >
+                    <button onClick={() => handleCall(truck.driver, truck.phone)} style={{ width: '100%', marginTop: '15px', padding: '12px', background: 'transparent', border: '1px solid #004d40', color: '#004d40', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                         <Phone size={18} /> Call Driver
                     </button>
-
                 </div>
             ))}
         </div>
-
     </div>
   );
 };
