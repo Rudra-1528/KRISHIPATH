@@ -10,45 +10,44 @@ const Fleet = () => {
   const t = translations.menu[lang] || translations.menu['en'];
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [lastUpdate, setLastUpdate] = useState(Date.now()); 
+  const [currentTime, setCurrentTime] = useState(Date.now()); 
 
-  // --- 1. STATIC DATA (Added 'route' field) ---
   const staticTrucks = [
     { 
       id: "VAC13143", 
       driver: "Rudra Pratap", 
       driverId: "DRV-101",
       phone: "+919580214142", 
-      location: "19.9975, 73.7898",
-      route: "Mumbai → Nashik", // <--- ADDED ROUTE
-      img: "https://randomuser.me/api/portraits/men/32.jpg"
+      route: "Mumbai → Nashik",
+      img: "https://randomuser.me/api/portraits/men/32.jpg",
+      defaultLocation: "19.0868, 72.8885" 
     },
     { 
       id: "MH-12-9988", 
       driver: "Shaurya Mudgal", 
       driverId: "DRV-102",
       phone: "+919354937688", 
-      location: "18.5204, 73.8567",
-      route: "Pune → Mumbai", // <--- ADDED ROUTE
-      img: "https://randomuser.me/api/portraits/men/45.jpg"
+      route: "Pune → Mumbai",
+      img: "https://randomuser.me/api/portraits/men/45.jpg",
+      defaultLocation: "18.5204, 73.8567"
     },
     { 
       id: "GJ-05-1122", 
       driver: "Vikram Singh", 
       driverId: "DRV-103",
       phone: "+919988777665", 
-      location: "21.1702, 72.8311",
-      route: "Surat → Vadodara", // <--- ADDED ROUTE
-      img: "https://randomuser.me/api/portraits/men/11.jpg"
+      route: "Surat → Vadodara",
+      img: "https://randomuser.me/api/portraits/men/11.jpg",
+      defaultLocation: "21.1702, 72.8311"
     },
     { 
       id: "MH-04-5544", 
       driver: "Amit Sharma", 
       driverId: "DRV-104",
       phone: "+919000011111", 
-      location: "19.2183, 72.9781",
-      route: "Thane → Pune", // <--- ADDED ROUTE
-      img: "https://randomuser.me/api/portraits/men/64.jpg"
+      route: "Thane → Pune",
+      img: "https://randomuser.me/api/portraits/men/64.jpg",
+      defaultLocation: "19.2183, 72.9781"
     },
   ];
 
@@ -58,7 +57,8 @@ const Fleet = () => {
     const unsubscribe = onSnapshot(collection(db, "shipments"), (snapshot) => {
       
       const liveData = snapshot.docs.reduce((acc, doc) => {
-        acc[doc.data().truck_id] = doc.data();
+        // --- FIX: DO NOT OVERWRITE TIMESTAMP WITH Date.now() ---
+        acc[doc.data().truck_id] = doc.data(); 
         return acc;
       }, {});
 
@@ -66,18 +66,23 @@ const Fleet = () => {
       const mergedStatic = staticTrucks.map(t => {
         const live = liveData[t.id];
         
+        // 1. Get Real Timestamp from DB. If missing, it is 0.
+        const lastUpdate = live && live.last_updated ? Number(live.last_updated) : 0;
+        // 2. Compare with NOW. If > 20 sec difference, it is Offline.
+        const isOffline = (Date.now() - lastUpdate) > 20000;
+
         let status = "Stopped";
-        let loc = t.location; 
+        let loc = t.defaultLocation; 
         let bat = 0;
-        let sig = "No Signal";
+        let sig = "Offline";
 
         if (live) {
-           status = live.status || "Moving";
+           status = isOffline ? "Signal Lost" : (live.status || "Moving");
            if (live.location) {
              loc = `${live.location.lat.toFixed(4)}, ${live.location.lng.toFixed(4)}`;
            }
-           bat = 85; 
-           sig = "Strong";
+           bat = isOffline ? 0 : 85; 
+           sig = isOffline ? "Offline" : "Strong";
         }
         
         return { ...t, status, location: loc, battery: bat, signal: sig };
@@ -85,39 +90,35 @@ const Fleet = () => {
 
       // B. Handle HERO TRUCK (GJ-01-LIVE)
       const heroLive = liveData["GJ-01-LIVE"];
-      if (heroLive) setLastUpdate(Date.now());
+      
+      const heroLastUpdate = heroLive && heroLive.last_updated ? Number(heroLive.last_updated) : 0;
+      const isHeroOffline = (Date.now() - heroLastUpdate) > 20000;
 
       const heroTruck = {
         id: "GJ-01-LIVE",
-        driver: "Rohit sharma", 
+        driver: "Rohit Sharma", 
         driverId: "DRV-999",
         phone: "+916204773940", 
-        img: "https://randomuser.me/api/portraits/men/32.jpg",
-        route: "Lavad → Gandhinagar", // <--- HERO ROUTE
+        img: "https://randomuser.me/api/portraits/men/75.jpg",
+        route: "Lavad → Gandhinagar",
         
-        status: heroLive ? heroLive.status : "Signal Lost", 
-        location: heroLive && heroLive.location ? `${heroLive.location.lat.toFixed(4)}, ${heroLive.location.lng.toFixed(4)}` : "0.0000, 0.0000",
-        battery: heroLive ? 85 : 0,
-        signal: heroLive ? "Strong" : "Offline"
+        status: isHeroOffline ? "Signal Lost" : (heroLive?.status || "Active"),
+        location: heroLive && heroLive.location ? `${heroLive.location.lat.toFixed(4)}, ${heroLive.location.lng.toFixed(4)}` : "23.0760, 72.8460",
+        battery: isHeroOffline ? 0 : 92,
+        signal: isHeroOffline ? "Offline" : "Strong"
       };
 
       setFleetData([heroTruck, ...mergedStatic]);
     });
 
-    // Check Offline Timeout
-    const interval = setInterval(() => {
-        if (Date.now() - lastUpdate > 15000) { 
-            setFleetData(prev => prev.map(t => {
-                if (t.id === "GJ-01-LIVE") {
-                    return { ...t, status: "Signal Lost", signal: "Offline", battery: 0, location: "23.0225, 72.5714" };
-                }
-                return t;
-            }));
-        }
-    }, 2000);
+    return () => unsubscribe();
+  }, [currentTime]); // Trigger re-calc every 2 seconds
 
-    return () => { unsubscribe(); clearInterval(interval); };
-  }, [lastUpdate]);
+  // Timer to update "Offline" status in real-time
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(Date.now()), 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCall = (name, number) => {
     const cleanNumber = number.replace(/\s/g, '');
@@ -149,7 +150,13 @@ const Fleet = () => {
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', color: '#333' }}><Truck size={20} color="#004d40" />{truck.id}</div>
-                        <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', background: truck.status === 'Signal Lost' ? '#eee' : truck.status === 'At Risk' ? '#ffebee' : '#e8f5e9', color: truck.status === 'Signal Lost' ? '#555' : truck.status === 'At Risk' ? '#d32f2f' : '#2e7d32' }}>{truck.status}</span>
+                        <span style={{ 
+                            padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', 
+                            background: truck.status === 'Signal Lost' ? '#eee' : truck.status === 'At Risk' ? '#ffebee' : '#e8f5e9', 
+                            color: truck.status === 'Signal Lost' ? '#555' : truck.status === 'At Risk' ? '#d32f2f' : '#2e7d32' 
+                        }}>
+                            {truck.status}
+                        </span>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
@@ -161,7 +168,6 @@ const Fleet = () => {
                     </div>
 
                     <div style={{ background: '#f9f9f9', padding: '15px', borderRadius: '10px', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {/* --- NEW ROUTE LINE --- */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', paddingBottom: '8px', marginBottom: '4px' }}>
                             <span style={{ color: '#666', display: 'flex', gap: '6px' }}><Map size={16}/> Route</span>
                             <span style={{ fontWeight: 'bold', color: '#1b5e20' }}>{truck.route}</span>
