@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from '../firebase'; 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import RoutingMachine from '../RoutingMachine'; 
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -44,22 +44,32 @@ const warehouseIcon = new L.Icon({
 
 const WAREHOUSE_LOCATION = [23.215, 72.636]; 
 
-const Dashboard = () => {
-  const { lang, isMobile } = useOutletContext(); 
-  const t = translations.dashboard[lang] || translations.dashboard['en'];
-
-  const staticFleet = [
+// STATIC FLEET (Moved outside to prevent re-renders)
+const STATIC_FLEET = [
     { id: "VAC13143", startCity: "Mumbai", endCity: "Nashik", location: { lat: 19.2183, lng: 72.9781 }, destCoords: [19.9975, 73.7898] },
     { id: "MH-12-9988", startCity: "Pune", endCity: "Mumbai", location: { lat: 18.75, lng: 73.4 }, destCoords: [19.0760, 72.8777] },
     { id: "GJ-05-1122", startCity: "Surat", endCity: "Vadodara", location: { lat: 21.70, lng: 72.99 }, destCoords: [22.3072, 73.1812] },
     { id: "MH-04-5544", startCity: "Thane", endCity: "Pune", location: { lat: 19.033, lng: 73.029 }, destCoords: [18.5204, 73.8567] }
-  ];
+];
 
-  const [trucks, setTrucks] = useState([]);
-  const [selectedTruck, setSelectedTruck] = useState(null);
-  const [currentTime, setCurrentTime] = useState(Date.now()); 
-  // Store local "receive time" for trucks sending millis()
-  const [localReceiveTimes, setLocalReceiveTimes] = useState({});
+// Helper to smooth map movement
+const RecenterMap = ({ lat, lng }) => {
+    const map = useMap();
+    useEffect(() => {
+        if(lat && lng) map.flyTo([lat, lng], map.getZoom());
+    }, [lat, lng, map]);
+    return null;
+};
+
+const Dashboard = () => {
+  const { lang, isMobile } = useOutletContext(); 
+  // If no language is passed, default to English (No Popup Logic Here)
+  const t = translations.dashboard[lang] || translations.dashboard['en'];
+
+  // State
+  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [liveDataMap, setLiveDataMap] = useState({});
+  const [selectedTruckId, setSelectedTruckId] = useState("GJ-01-LIVE");
 
   const translateCity = (city) => {
     if (translations.cities[city] && translations.cities[city][lang]) {
@@ -68,134 +78,87 @@ const Dashboard = () => {
     return city; 
   };
 
+  // 1. DATABASE LISTENER (Run Once)
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "shipments"), (snapshot) => {
-      const liveData = {};
-      const newReceiveTimes = { ...localReceiveTimes };
-
+      const newMap = {};
       snapshot.docs.forEach(doc => {
-          const data = doc.data();
-          const truckId = data.truck_id;
-          liveData[truckId] = data;
-
-          // LOGIC FIX:
-          // If we receive a new update, mark the exact moment we got it.
-          // This allows us to handle both NTP (huge numbers) and millis() (small numbers).
-          // We only update this time if the data ACTUALLY changed or is fresh from snapshot.
-          if (!newReceiveTimes[truckId] || doc.metadata.hasPendingWrites || data.last_updated !== liveData[truckId]?.last_updated) {
-               newReceiveTimes[truckId] = Date.now();
-          }
+          newMap[doc.data().truck_id] = doc.data();
       });
-      setLocalReceiveTimes(newReceiveTimes);
+      setLiveDataMap(newMap);
+    });
+    return () => unsubscribe();
+  }, []);
 
-      const mergedList = staticFleet.map(t => {
-        const live = liveData[t.id];
+  // 2. TIMER (Updates every 500ms for offline check)
+  useEffect(() => {
+    const timer = setInterval(() => {
+        setCurrentTime(Date.now());
+    }, 500);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 3. PROCESS DATA (Merge Live + Static)
+  const trucks = useMemo(() => {
+      // Process Static
+      const processedStatic = STATIC_FLEET.map(t => {
+        const live = liveDataMap[t.id];
         return {
           ...t,
-          status: live ? (live.status || "Moving") : "Stopped",
-          location: live && live.location ? live.location : t.location,
-          sensors: live && live.sensors ? live.sensors : { temp: 24, humidity: 50 },
-          shock: live ? live.shock : 0.05,
-          rotation: live ? live.rotation : 0,
+          status: live?.status || "Moving",
+          location: live?.location || t.location,
+          sensors: live?.sensors || { temp: 24, humidity: 50 },
+          shock: live?.shock || 0.05,
+          rotation: live?.rotation || 0,
           destCoords: t.destCoords,
-          last_updated: live ? live.last_updated : 0 
+          isOffline: false
         };
       });
 
-      const heroLive = liveData["GJ-01-LIVE"];
+      // Process Hero
+      const heroLive = liveDataMap["GJ-01-LIVE"];
+      const lastUpdate = heroLive?.last_updated ? Number(heroLive.last_updated) : 0;
+      const isHeroOffline = (currentTime - lastUpdate) > 20000; // 20s Timeout
+
       const heroTruck = {
         id: "GJ-01-LIVE",
         startCity: "Lavad",
         endCity: "Gandhinagar",
-        status: heroLive ? heroLive.status : "Signal Lost",
-        location: heroLive && heroLive.location ? heroLive.location : { lat: 23.076, lng: 72.846 }, 
-        sensors: heroLive && heroLive.sensors ? heroLive.sensors : { temp: 0, humidity: 0 },
-        shock: heroLive ? heroLive.shock : 0,
-        rotation: heroLive ? heroLive.rotation : 0,
         destCoords: WAREHOUSE_LOCATION,
-        last_updated: heroLive ? heroLive.last_updated : 0 
+        status: isHeroOffline ? "Signal Lost" : (heroLive?.status || "Active"),
+        location: heroLive?.location || { lat: 23.076, lng: 72.846 },
+        sensors: isHeroOffline ? { temp: 0, humidity: 0 } : (heroLive?.sensors || { temp: 0, humidity: 0 }),
+        shock: isHeroOffline ? 0 : (heroLive?.shock || 0),
+        rotation: isHeroOffline ? 0 : (heroLive?.rotation || 0),
+        isOffline: isHeroOffline
       };
 
-      const finalTruckList = [heroTruck, ...mergedList];
-      setTrucks(finalTruckList);
+      return [heroTruck, ...processedStatic];
+  }, [liveDataMap, currentTime]);
 
-      if (!selectedTruck) setSelectedTruck(heroTruck);
-      if (selectedTruck && selectedTruck.id === "GJ-01-LIVE") {
-        setSelectedTruck(prev => ({ ...prev, ...heroTruck }));
-      }
-    });
+  const selectedTruck = trucks.find(t => t.id === selectedTruckId) || trucks[0];
+  const currentHealth = !selectedTruck.isOffline ? (100 - (selectedTruck.status === 'At Risk' ? 40 : 0)) : 0;
+  const isGlobalOnline = !trucks.find(t => t.id === "GJ-01-LIVE")?.isOffline;
 
-    return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  // 4. MEMOIZE ROUTE COORDINATES (Fixes the Flashing Map Issue)
+  const routeStart = useMemo(() => {
+      if(!selectedTruck?.location) return null;
+      return [selectedTruck.location.lat, selectedTruck.location.lng];
+  }, [selectedTruck?.location?.lat, selectedTruck?.location?.lng]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-        setCurrentTime(Date.now());
-    }, 2000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // --- SMART STATUS CHECKER ---
-  const getTruckStatus = (truck) => {
-      if (!truck) return { isOffline: true, status: "Offline", sensors: { temp: 0, humidity: 0 }, shock: 0 };
-      
-      const lastUpdateVal = truck.last_updated;
-      const receiveTime = localReceiveTimes[truck.id] || 0;
-
-      let isOffline = true;
-
-      // Scenario A: Static fleet (always online for demo)
-      if (truck.id !== "GJ-01-LIVE") {
-           isOffline = false; 
-      } 
-      // Scenario B: Real Truck
-      else {
-          // If we haven't received ANY data update in 15 seconds locally, it's offline.
-          if ((currentTime - receiveTime) < 15000) {
-              isOffline = false;
-          }
-      }
-
-      // Force offline if 'last_updated' is clearly junk/missing from DB
-      if (!lastUpdateVal && truck.id === "GJ-01-LIVE") isOffline = true;
-
-      return {
-          isOffline: isOffline,
-          status: isOffline ? "Signal Lost" : truck.status,
-          sensors: isOffline ? { temp: 0, humidity: 0 } : truck.sensors,
-          shock: isOffline ? 0 : truck.shock,
-          rotation: isOffline ? 0 : truck.rotation
-      };
-  };
-
-  const activeStatus = getTruckStatus(selectedTruck);
-  const currentHealth = !activeStatus.isOffline ? (100 - (activeStatus.status === 'At Risk' ? 40 : 0)) : 0;
-  const isGlobalOnline = trucks.some(t => {
-      const s = getTruckStatus(t);
-      return !s.isOffline;
-  });
+  const routeEnd = useMemo(() => {
+      return selectedTruck?.destCoords || null;
+  }, [selectedTruck?.destCoords]);
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '25px', paddingBottom: '20px' }}>
         
-        {/* HEADER */}
+        {/* HEADER - CLEAN (No Popup Logic) */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1 style={{ margin: 0, fontSize: isMobile ? '20px' : '24px', color: 'var(--primary-green)', fontWeight: 'bold' }}>{t.header}</h1>
-            <div style={{ 
-                display: 'flex', alignItems: 'center', gap: '8px', 
-                background: isGlobalOnline ? '#e8f5e9' : '#ffebee', 
-                padding: '6px 12px', borderRadius: '20px', 
-                border: isGlobalOnline ? '1px solid #c8e6c9' : '1px solid #ffcdd2',
-            }}>
-                <div style={{ 
-                    width: '10px', height: '10px', borderRadius: '50%', 
-                    background: isGlobalOnline ? '#2e7d32' : '#d32f2f',
-                    boxShadow: isGlobalOnline ? '0 0 8px #2e7d32' : 'none',
-                }}></div>
-                <span style={{ fontSize: '12px', fontWeight: 'bold', color: isGlobalOnline ? '#2e7d32' : '#d32f2f' }}>
-                    {isGlobalOnline ? t.online : t.offline}
-                </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isGlobalOnline ? '#e8f5e9' : '#ffebee', padding: '6px 12px', borderRadius: '20px', border: isGlobalOnline ? '1px solid #c8e6c9' : '1px solid #ffcdd2' }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: isGlobalOnline ? '#2e7d32' : '#d32f2f', boxShadow: isGlobalOnline ? '0 0 8px #2e7d32' : 'none' }}></div>
+                <span style={{ fontSize: '12px', fontWeight: 'bold', color: isGlobalOnline ? '#2e7d32' : '#d32f2f' }}>{isGlobalOnline ? t.online : t.offline}</span>
             </div>
         </div>
 
@@ -206,19 +169,21 @@ const Dashboard = () => {
                 <MapContainer center={[23.15, 72.74]} zoom={10} style={{ height: '100%', width: '100%' }}>
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     
-                    {trucks.map(truck => {
-                        const s = getTruckStatus(truck);
-                        return (
-                            <Marker 
-                                key={truck.id} 
-                                position={[truck.location.lat, truck.location.lng]} 
-                                icon={s.isOffline ? truckIconOffline : truckIcon} 
-                                eventHandlers={{ click: () => setSelectedTruck(truck) }}
-                            >
-                                <Popup><strong>{truck.id}</strong><br/>{s.status}</Popup>
-                            </Marker>
-                        )
-                    })}
+                    {/* Auto-center map when truck moves */}
+                    {selectedTruck?.location && (
+                        <RecenterMap lat={selectedTruck.location.lat} lng={selectedTruck.location.lng} />
+                    )}
+
+                    {trucks.map(truck => (
+                        <Marker 
+                            key={truck.id} 
+                            position={[truck.location.lat, truck.location.lng]} 
+                            icon={truck.isOffline ? truckIconOffline : truckIcon} 
+                            eventHandlers={{ click: () => setSelectedTruckId(truck.id) }}
+                        >
+                            <Popup><strong>{truck.id}</strong><br/>{truck.status}</Popup>
+                        </Marker>
+                    ))}
                     
                     {selectedTruck && selectedTruck.destCoords && (
                         <Marker position={selectedTruck.destCoords} icon={warehouseIcon}>
@@ -226,11 +191,9 @@ const Dashboard = () => {
                         </Marker>
                     )}
 
-                    {selectedTruck && selectedTruck.location && selectedTruck.destCoords && (
-                         <RoutingMachine 
-                            start={[selectedTruck.location.lat, selectedTruck.location.lng]}
-                            end={selectedTruck.destCoords}
-                         /> 
+                    {/* FIXED: Removed 'key' prop to stop flashing, used memoized coords */}
+                    {routeStart && routeEnd && (
+                         <RoutingMachine start={routeStart} end={routeEnd} /> 
                     )}
                 </MapContainer>
             </div>
@@ -245,27 +208,25 @@ const Dashboard = () => {
                         </div>
                         <div style={{ textAlign: 'center' }}>
                             <h4 style={{ margin: 0, color: '#666', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase' }}>{t.systemHealth}</h4>
-                            <div style={{ fontSize: '64px', fontWeight: '800', color: !activeStatus.isOffline && currentHealth > 80 ? 'var(--primary-green)' : '#d32f2f', margin: '5px 0', lineHeight: '1' }}>{currentHealth}%</div>
-                            <span style={{ fontSize: '13px', color: '#888' }}>{activeStatus.isOffline ? "CONNECTION LOST" : t.analysis}</span>
+                            <div style={{ fontSize: '64px', fontWeight: '800', color: !selectedTruck.isOffline && currentHealth > 80 ? 'var(--primary-green)' : '#d32f2f', margin: '5px 0', lineHeight: '1' }}>{currentHealth}%</div>
+                            <span style={{ fontSize: '13px', color: '#888' }}>{selectedTruck.isOffline ? "CONNECTION LOST" : t.analysis}</span>
                         </div>
                         <div style={{ background: '#fcfcfc', borderRadius: '12px', padding: '15px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px solid #eee' }}>
-                            <Row label="Temp (SHT30)" value={`${activeStatus.sensors.temp}°C`} />
-                            <Row label="Shock (Accel)" value={`${activeStatus.shock}G`} color={activeStatus.isOffline ? "#999" : "var(--primary-green)"} bold />
-                            <Row label="Rotation" value={`${activeStatus.rotation}°/s`} />
-                            <Row label="Humidity" value={`${activeStatus.sensors.humidity || 0}%`} />
+                            <Row label="Temp (SHT30)" value={`${selectedTruck.sensors.temp}°C`} />
+                            <Row label="Shock (Accel)" value={`${selectedTruck.shock}G`} color={selectedTruck.isOffline ? "#999" : "var(--primary-green)"} bold />
+                            <Row label="Rotation" value={`${selectedTruck.rotation}°/s`} />
+                            <Row label="Humidity" value={`${selectedTruck.sensors.humidity || 0}%`} />
                         </div>
-                        <div style={{ background: activeStatus.isOffline ? '#eeeeee' : activeStatus.status === 'At Risk' ? '#ffebee' : '#e3f2fd', padding: '15px', borderRadius: '12px', borderLeft: activeStatus.isOffline ? '4px solid #999' : activeStatus.status === 'At Risk' ? '4px solid #d32f2f' : '4px solid #1976d2' }}>
-                            <div style={{ fontSize: '12px', color: activeStatus.isOffline ? '#666' : '#1565c0', fontWeight: '700', marginBottom: '4px' }}>AI Monitor (SVM):</div>
-                            <div style={{ fontSize: '13px', color: activeStatus.isOffline ? '#555' : '#0d47a1', fontWeight: '500' }}>
-                                {activeStatus.isOffline ? "Waiting for connection..." : activeStatus.status === 'At Risk' ? "Anomaly Detected - Possible Tampering" : "Safe Transit"}
+                        <div style={{ background: selectedTruck.isOffline ? '#eeeeee' : selectedTruck.status === 'At Risk' ? '#ffebee' : '#e3f2fd', padding: '15px', borderRadius: '12px', borderLeft: selectedTruck.isOffline ? '4px solid #999' : selectedTruck.status === 'At Risk' ? '4px solid #d32f2f' : '4px solid #1976d2' }}>
+                            <div style={{ fontSize: '12px', color: selectedTruck.isOffline ? '#666' : '#1565c0', fontWeight: '700', marginBottom: '4px' }}>AI Monitor (SVM):</div>
+                            <div style={{ fontSize: '13px', color: selectedTruck.isOffline ? '#555' : '#0d47a1', fontWeight: '500' }}>
+                                {selectedTruck.isOffline ? "Waiting for connection..." : selectedTruck.status === 'At Risk' ? "Anomaly Detected - Possible Tampering" : "Safe Transit"}
                             </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#666' }}>
                              <span style={{ fontWeight: '500' }}>Sync Status:</span>
-                             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: activeStatus.isOffline ? 'grey' : '#2e7d32' }}></span>
-                             <span style={{ color: activeStatus.isOffline ? 'grey' : '#2e7d32', fontWeight: '700' }}>
-                                {activeStatus.isOffline ? "Disconnected" : "Live"}
-                             </span>
+                             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: selectedTruck.isOffline ? 'grey' : '#2e7d32' }}></span>
+                             <span style={{ color: selectedTruck.isOffline ? 'grey' : '#2e7d32', fontWeight: '700' }}>{selectedTruck.isOffline ? "Disconnected" : "Live"}</span>
                         </div>
                     </>
                 ) : (
@@ -287,25 +248,18 @@ const Dashboard = () => {
                 </tr>
             </thead>
             <tbody>
-              {trucks.map(truck => {
-                const s = getTruckStatus(truck);
-                return (
-                    <tr key={truck.id} onClick={() => setSelectedTruck(truck)} style={{ background: selectedTruck && selectedTruck.id === truck.id ? '#f1f8e9' : '#fff', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.02)' }} className="hover-row">
+              {trucks.map(truck => (
+                    <tr key={truck.id} onClick={() => setSelectedTruckId(truck.id)} style={{ background: selectedTruck && selectedTruck.id === truck.id ? '#f1f8e9' : '#fff', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.02)' }} className="hover-row">
                       <td style={tdStyleFirst}><span style={{fontWeight: '700', color: '#2d5a27'}}>{truck.id}</span></td>
                       <td style={tdStyle}>{translateCity(truck.startCity)} → {translateCity(truck.endCity)}</td>
                       <td style={tdStyle}>
-                          <span style={{ 
-                              padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '600',
-                              background: s.isOffline ? '#eee' : s.status === 'At Risk' ? '#ffebee' : '#e8f5e9',
-                              color: s.isOffline ? '#666' : s.status === 'At Risk' ? '#c62828' : '#2e7d32'
-                          }}>
-                              {s.status}
+                          <span style={{ padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '600', background: truck.isOffline ? '#eee' : truck.status === 'At Risk' ? '#ffebee' : '#e8f5e9', color: truck.isOffline ? '#666' : truck.status === 'At Risk' ? '#c62828' : '#2e7d32' }}>
+                              {truck.status}
                           </span>
                       </td>
-                      <td style={tdStyleLast}>{s.sensors.temp}°C</td>
+                      <td style={tdStyleLast}>{truck.sensors.temp}°C</td>
                     </tr>
-                )
-              })}
+              ))}
             </tbody>
           </table>
         </div>

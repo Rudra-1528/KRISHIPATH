@@ -35,30 +35,30 @@ const RouteAnalysis = () => {
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '20px' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '12px' : '20px', padding: isMobile ? '12px' : '0' }}>
         
         {/* --- LEFT PANEL: CONTROLS --- */}
-        <div style={{ width: isMobile ? '100%' : '350px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ background: 'white', padding: '25px', borderRadius: '15px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                <h2 style={{ marginTop: 0, color: 'var(--primary-green)' }}>{t.title}</h2>
-                <p style={{ color: '#666', fontSize: '13px' }}>{t.sub}</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
-                    <div><label style={labelStyle}>{t.start}</label><select style={inputStyle} value={start} onChange={(e) => setStart(e.target.value)}>{Object.keys(LOCATIONS).map(loc => <option key={loc} value={loc}>{loc}</option>)}</select></div>
-                    <div><label style={labelStyle}>{t.dest}</label><select style={inputStyle} value={end} onChange={(e) => setEnd(e.target.value)}>{Object.keys(LOCATIONS).map(loc => <option key={loc} value={loc}>{loc}</option>)}</select></div>
-                    <button onClick={handleAnalyze} style={{ padding: '15px', background: 'var(--primary-green)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', marginTop: '10px' }}>{loading ? t.analyzing : t.analyzeBtn}</button>
+        <div style={{ width: isMobile ? '100%' : '350px', display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px' }}>
+            <div style={{ background: 'white', padding: isMobile ? '15px' : '25px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                <h2 style={{ marginTop: 0, color: 'var(--primary-green)', fontSize: isMobile ? '18px' : '20px' }}>{t.title}</h2>
+                <p style={{ color: '#666', fontSize: isMobile ? '12px' : '13px' }}>{t.sub}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '10px' : '15px', marginTop: isMobile ? '12px' : '20px' }}>
+                    <div><label style={{...labelStyle, fontSize: isMobile ? '12px' : '13px'}}>{t.start}</label><select style={{...inputStyle, fontSize: isMobile ? '12px' : '13px', padding: isMobile ? '8px' : '10px'}} value={start} onChange={(e) => setStart(e.target.value)}>{Object.keys(LOCATIONS).map(loc => <option key={loc} value={loc}>{loc}</option>)}</select></div>
+                    <div><label style={{...labelStyle, fontSize: isMobile ? '12px' : '13px'}}>{t.dest}</label><select style={{...inputStyle, fontSize: isMobile ? '12px' : '13px', padding: isMobile ? '8px' : '10px'}} value={end} onChange={(e) => setEnd(e.target.value)}>{Object.keys(LOCATIONS).map(loc => <option key={loc} value={loc}>{loc}</option>)}</select></div>
+                    <button onClick={handleAnalyze} style={{ padding: isMobile ? '10px' : '15px', background: 'var(--primary-green)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', marginTop: isMobile ? '8px' : '10px', fontSize: isMobile ? '13px' : '14px' }}>{loading ? t.analyzing : t.analyzeBtn}</button>
                 </div>
             </div>
 
             {analysis && (
-                <div style={{ background: 'white', padding: '25px', borderRadius: '15px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderLeft: analysis.riskScore > 25 ? '5px solid #d32f2f' : '5px solid #2d5a27' }}>
-                    <h3 style={{ margin: 0, color: '#333' }}>{t.report}</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '20px' }}>
-                        <div><div style={labelStyle}>{t.time}</div><div style={valStyle}>{analysis.time}</div></div>
-                        <div><div style={labelStyle}>{t.dist}</div><div style={valStyle}>{analysis.distance}</div></div>
-                        <div><div style={labelStyle}>{t.fuel}</div><div style={valStyle}>{analysis.fuelCost}</div></div>
-                        <div><div style={labelStyle}>{t.risk}</div><div style={{...valStyle, color: analysis.riskScore > 25 ? 'red' : 'green'}}>{analysis.riskScore}%</div></div>
+                <div style={{ background: 'white', padding: isMobile ? '15px' : '25px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderLeft: analysis.riskScore > 25 ? '5px solid #d32f2f' : '5px solid #2d5a27' }}>
+                    <h3 style={{ margin: 0, color: '#333', fontSize: isMobile ? '16px' : '18px' }}>{t.report}</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '10px' : '15px', marginTop: isMobile ? '12px' : '20px' }}>
+                        <div><div style={{...labelStyle, fontSize: isMobile ? '11px' : '13px'}}>{t.time}</div><div style={{...valStyle, fontSize: isMobile ? '14px' : '16px'}}>{analysis.time}</div></div>
+                        <div><div style={{...labelStyle, fontSize: isMobile ? '11px' : '13px'}}>{t.dist}</div><div style={{...valStyle, fontSize: isMobile ? '14px' : '16px'}}>{analysis.distance}</div></div>
+                        <div><div style={{...labelStyle, fontSize: isMobile ? '11px' : '13px'}}>{t.fuel}</div><div style={{...valStyle, fontSize: isMobile ? '14px' : '16px'}}>{analysis.fuelCost}</div></div>
+                        <div><div style={{...labelStyle, fontSize: isMobile ? '11px' : '13px'}}>{t.risk}</div><div style={{...valStyle, color: analysis.riskScore > 25 ? 'red' : 'green', fontSize: isMobile ? '14px' : '16px'}}>{analysis.riskScore}%</div></div>
                     </div>
-                    <div style={{ marginTop: '20px', padding: '10px', background: analysis.riskScore > 25 ? '#ffebee' : '#e8f5e9', borderRadius: '8px', fontSize: '13px', color: analysis.riskScore > 25 ? '#c62828' : '#2d5a27', fontWeight: 'bold', textAlign: 'center' }}>
+                    <div style={{ marginTop: isMobile ? '12px' : '20px', padding: '10px', background: analysis.riskScore > 25 ? '#ffebee' : '#e8f5e9', borderRadius: '8px', fontSize: isMobile ? '12px' : '13px', color: analysis.riskScore > 25 ? '#c62828' : '#2d5a27', fontWeight: 'bold', textAlign: 'center' }}>
                         {analysis.recommendation}
                     </div>
                 </div>
@@ -66,7 +66,7 @@ const RouteAnalysis = () => {
         </div>
 
         {/* --- RIGHT PANEL: MAP --- */}
-        <div style={{ flex: 1, borderRadius: '15px', overflow: 'hidden', border: '1px solid #ddd', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', height: isMobile ? '350px' : 'auto' }}>
+        <div style={{ flex: 1, borderRadius: '12px', overflow: 'hidden', border: '1px solid #ddd', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', height: isMobile ? '300px' : 'auto', minHeight: isMobile ? '300px' : '400px' }}>
              <MapContainer center={[19.0760, 72.8777]} zoom={9} style={{ height: '100%', width: '100%' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <Marker position={LOCATIONS[start]}><Popup>Start</Popup></Marker>

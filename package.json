@@ -12,6 +12,7 @@
   "dependencies": {
     "chart.js": "^4.5.1",
     "firebase": "^12.7.0",
+    "jspdf": "^4.0.0",
     "leaflet": "^1.9.4",
     "leaflet-routing-machine": "^3.2.12",
     "lucide-react": "^0.562.0",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Search, Phone, User, Battery, Signal, MapPin, Truck, Map } from 'lucide-react';
 import { collection, onSnapshot } from "firebase/firestore"; 
@@ -11,6 +11,8 @@ const Fleet = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentTime, setCurrentTime] = useState(Date.now()); 
+  // FIX 1: Store raw data separately to prevent connection resets
+  const [liveDataMap, setLiveDataMap] = useState({}); 
 
   const staticTrucks = [
     { 
@@ -51,25 +53,37 @@ const Fleet = () => {
     },
   ];
 
-  const [fleetData, setFleetData] = useState([]);
-
+  // --- FIX 2: RUN DATABASE LISTENER ONCE ONLY ---
+  // The empty array [] means "Connect once and stay connected"
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "shipments"), (snapshot) => {
-      
-      const liveData = snapshot.docs.reduce((acc, doc) => {
-        // --- FIX: DO NOT OVERWRITE TIMESTAMP WITH Date.now() ---
-        acc[doc.data().truck_id] = doc.data(); 
-        return acc;
-      }, {});
+      const newMap = {};
+      snapshot.docs.forEach(doc => {
+        newMap[doc.data().truck_id] = doc.data();
+      });
+      setLiveDataMap(newMap);
+    });
 
+    return () => unsubscribe();
+  }, []); 
+
+  // --- FIX 3: SEPARATE TIMER FOR OFFLINE CHECK ---
+  // This updates the screen every 2 seconds without resetting the database
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(Date.now()), 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // --- FIX 4: MERGE DATA ON THE FLY ---
+  const fleetData = useMemo(() => {
+      
       // A. Process Static Trucks
       const mergedStatic = staticTrucks.map(t => {
-        const live = liveData[t.id];
+        const live = liveDataMap[t.id];
         
-        // 1. Get Real Timestamp from DB. If missing, it is 0.
+        // Check Offline Status using CURRENT TIME
         const lastUpdate = live && live.last_updated ? Number(live.last_updated) : 0;
-        // 2. Compare with NOW. If > 20 sec difference, it is Offline.
-        const isOffline = (Date.now() - lastUpdate) > 20000;
+        const isOffline = (currentTime - lastUpdate) > 20000; // 20s Timeout
 
         let status = "Stopped";
         let loc = t.defaultLocation; 
@@ -88,11 +102,10 @@ const Fleet = () => {
         return { ...t, status, location: loc, battery: bat, signal: sig };
       });
 
-      // B. Handle HERO TRUCK (GJ-01-LIVE)
-      const heroLive = liveData["GJ-01-LIVE"];
-      
+      // B. Process HERO TRUCK (GJ-01-LIVE)
+      const heroLive = liveDataMap["GJ-01-LIVE"];
       const heroLastUpdate = heroLive && heroLive.last_updated ? Number(heroLive.last_updated) : 0;
-      const isHeroOffline = (Date.now() - heroLastUpdate) > 20000;
+      const isHeroOffline = (currentTime - heroLastUpdate) > 20000;
 
       const heroTruck = {
         id: "GJ-01-LIVE",
@@ -108,17 +121,9 @@ const Fleet = () => {
         signal: isHeroOffline ? "Offline" : "Strong"
       };
 
-      setFleetData([heroTruck, ...mergedStatic]);
-    });
+      return [heroTruck, ...mergedStatic];
 
-    return () => unsubscribe();
-  }, [currentTime]); // Trigger re-calc every 2 seconds
-
-  // Timer to update "Offline" status in real-time
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(Date.now()), 2000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [liveDataMap, currentTime]); // Re-runs ONLY when data arrives OR time changes
 
   const handleCall = (name, number) => {
     const cleanNumber = number.replace(/\s/g, '');
@@ -131,20 +136,20 @@ const Fleet = () => {
   );
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', padding: isMobile ? '12px' : '0' }}>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
             <div>
-                <h1 style={{ margin: 0, fontSize: isMobile ? '20px' : '24px', color: '#1b5e20' }}>Live Fleet Status</h1>
-                <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '14px' }}>Manage drivers and vehicle health.</p>
+                <h1 style={{ margin: 0, fontSize: isMobile ? '20px' : '24px', color: '#1b5e20' }}>Gaadi Maalik Dashboard</h1>
+                <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '14px' }}>Fleet & Driver Management (ट्रांसपोर्टर व्यू)</p>
             </div>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}>
                 <Search size={18} color="#888" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
-                <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ padding: '12px 12px 12px 45px', borderRadius: '10px', border: '1px solid #ddd', width: '280px', outline: 'none', fontSize: '14px' }} />
+                <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ padding: '12px 12px 12px 45px', borderRadius: '10px', border: '1px solid #ddd', width: isMobile ? '100%' : '280px', outline: 'none', fontSize: '14px' }} />
             </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', overflowY: 'auto', paddingBottom: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: isMobile ? '12px' : '20px', overflowY: 'auto', paddingBottom: '20px' }}>
             {filteredTrucks.map(truck => (
                 <div key={truck.id} style={{ background: 'white', borderRadius: '15px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderTop: truck.status === 'Signal Lost' ? '4px solid #757575' : truck.status === 'At Risk' ? '4px solid #d32f2f' : '4px solid #2e7d32' }}>
                     

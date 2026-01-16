@@ -2,8 +2,9 @@ import React from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import { TrendingUp, Package, AlertOctagon, Clock } from 'lucide-react';
+import { TrendingUp, Package, AlertOctagon, Clock, FileText } from 'lucide-react'; // Added FileText
 import { translations } from '../translations';
+import { jsPDF } from "jspdf"; // Added jsPDF
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -18,11 +19,66 @@ const Analytics = () => {
   const shipmentData = { labels: ['Mum', 'Pun', 'Nas', 'Sur', 'Nag', 'Goa'], datasets: [{ label: 'Shipments', data: [120, 95, 80, 110, 60, 45], backgroundColor: '#2d5a27', borderRadius: 5 }] };
   const statusData = { labels: ['On Time', 'Delayed', 'At Risk', 'Cancelled'], datasets: [{ data: [65, 15, 12, 8], backgroundColor: ['#2d5a27', '#fbc02d', '#d32f2f', '#9e9e9e'], borderWidth: 0 }] };
 
+  // --- NEW: PDF EXPORT FUNCTION ---
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(22);
+    doc.setTextColor(45, 90, 39); // Green Color
+    doc.text("Harvest Link - Analytics Report", 20, 20);
+    
+    // Timestamp
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 30);
+
+    // KPI Section
+    doc.setFontSize(16);
+    doc.setTextColor(0);
+    doc.text("Key Performance Summary:", 20, 45);
+    
+    doc.setFontSize(12);
+    doc.text(`- Total Shipments: 1,245 (+12%)`, 20, 55);
+    doc.text(`- Avg Delivery Time: 4.2 Days (-0.5 days)`, 20, 65);
+    doc.text(`- Risk Factor: 2.1% (Safe)`, 20, 75);
+    doc.text(`- Revenue Protected: Rs 4.5L`, 20, 85);
+
+    // Route Efficiency Section
+    doc.setFontSize(16);
+    doc.text("Route Efficiency Data:", 20, 105);
+    
+    const routes = [
+        ["Mumbai - Pune", "98%"],
+        ["Nashik - Surat", "92%"],
+        ["Nagpur - Mumbai", "87%"],
+        ["Goa - Belgaum", "96%"]
+    ];
+    
+    let y = 115;
+    doc.setFontSize(12);
+    routes.forEach(row => {
+        doc.text(`${row[0]} ........................ ${row[1]}`, 20, y);
+        y += 10;
+    });
+
+    // Save
+    doc.save("Analytics_Report.pdf");
+  };
+
   return (
     <div style={{ paddingBottom: '20px', display: 'flex', flexDirection: 'column', gap: '25px', height: '100%' }}>
         
-        <div>
+        {/* HEADER WITH PDF BUTTON */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1 style={{ margin: 0, fontSize: isMobile ? '20px' : '24px', color: 'var(--primary-green)' }}>{t.title}</h1>
+            <button onClick={handleExportPDF} style={{ 
+                background: '#d32f2f', color: 'white', border: 'none', 
+                padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', 
+                display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', fontSize: '14px' 
+            }}>
+                <FileText size={16}/> Export PDF
+            </button>
         </div>
 
         {/* --- KPI CARDS (Stack on Mobile) --- */}
