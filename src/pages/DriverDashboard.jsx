@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { FileText, Navigation, Zap } from 'lucide-react';
@@ -27,6 +28,7 @@ const DriverDashboard = () => {
     const endCoords = [23.215, 72.636];
   // Toggle for Analysis Card
   const [showAnalysis, setShowAnalysis] = useState(true);
+    const { lang } = useOutletContext();
 
   // PDF Opener (Dummy)
   const openPDF = () => {

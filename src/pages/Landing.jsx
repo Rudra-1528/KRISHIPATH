@@ -5,6 +5,11 @@ import { User, Truck, Sprout, Building2, Globe } from 'lucide-react';
 const Landing = ({ setLang }) => {
   const navigate = useNavigate();
   const [langSelected, setLangSelected] = useState(false);
+  const [selectedLang, setSelectedLang] = useState(() => {
+    const saved = localStorage.getItem('harvest_lang');
+    return saved || 'en';
+  });
+  const [saveDefault, setSaveDefault] = useState(false);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   const isMobile = windowWidth < 768;
 
@@ -26,7 +31,11 @@ const Landing = ({ setLang }) => {
   ];
 
   const handleLangSelect = (code) => {
+    setSelectedLang(code);
     setLang(code);
+    if (saveDefault) {
+      localStorage.setItem('harvest_lang', code);
+    }
     setLangSelected(true);
   };
 
@@ -46,6 +55,19 @@ const Landing = ({ setLang }) => {
               </button>
             ))}
           </div>
+
+          <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
+            <input 
+              type="checkbox" 
+              id="saveDefault" 
+              checked={saveDefault} 
+              onChange={(e) => setSaveDefault(e.target.checked)}
+              style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+            />
+            <label htmlFor="saveDefault" style={{ cursor: 'pointer', fontSize: isMobile ? '12px' : '14px', color: '#333' }}>
+              Save as default language
+            </label>
+          </div>
         </div>
       )}
 
@@ -57,25 +79,25 @@ const Landing = ({ setLang }) => {
           
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', gap: isMobile ? '12px' : '20px', width: '100%' }}>
             
-            <div onClick={() => navigate('/dashboard')} style={{...cardStyle, padding: isMobile ? '18px' : '25px', gap: isMobile ? '8px' : '10px'}}>
+            <div onClick={() => navigate('/login', { state: { role: 'admin', lang: selectedLang } })} style={{...cardStyle, padding: isMobile ? '18px' : '25px', gap: isMobile ? '8px' : '10px'}}>
               <div style={{...iconCircle, width: isMobile ? '40px' : '50px', height: isMobile ? '40px' : '50px'}}><Building2 color="white" size={isMobile ? 20 : 24} /></div>
               <h3 style={{fontSize: isMobile ? '14px' : '16px'}}>Head Office</h3>
               <p style={{fontSize: isMobile ? '11px' : '13px'}}>Admin Dashboard</p>
             </div>
 
-            <div onClick={() => navigate('/farmer')} style={{...cardStyle, padding: isMobile ? '18px' : '25px', gap: isMobile ? '8px' : '10px'}}>
+            <div onClick={() => navigate('/login', { state: { role: 'farmer', lang: selectedLang } })} style={{...cardStyle, padding: isMobile ? '18px' : '25px', gap: isMobile ? '8px' : '10px'}}>
               <div style={{...iconCircle, width: isMobile ? '40px' : '50px', height: isMobile ? '40px' : '50px'}}><Sprout color="white" size={isMobile ? 20 : 24} /></div>
               <h3 style={{fontSize: isMobile ? '14px' : '16px'}}>Kisan View</h3>
               <p style={{fontSize: isMobile ? '11px' : '13px'}}>Cargo Health Index</p>
             </div>
 
-            <div onClick={() => navigate('/fleet-standalone')} style={{...cardStyle, padding: isMobile ? '18px' : '25px', gap: isMobile ? '8px' : '10px'}}>
+            <div onClick={() => navigate('/login', { state: { role: 'transporter', lang: selectedLang } })} style={{...cardStyle, padding: isMobile ? '18px' : '25px', gap: isMobile ? '8px' : '10px'}}>
               <div style={{...iconCircle, width: isMobile ? '40px' : '50px', height: isMobile ? '40px' : '50px'}}><Truck color="white" size={isMobile ? 20 : 24} /></div>
               <h3 style={{fontSize: isMobile ? '14px' : '16px'}}>Gaadi Maalik</h3>
               <p style={{fontSize: isMobile ? '11px' : '13px'}}>Fleet Management</p>
             </div>
 
-            <div onClick={() => navigate('/driver')} style={{...cardStyle, padding: isMobile ? '18px' : '25px', gap: isMobile ? '8px' : '10px'}}>
+            <div onClick={() => navigate('/login', { state: { role: 'driver', lang: selectedLang } })} style={{...cardStyle, padding: isMobile ? '18px' : '25px', gap: isMobile ? '8px' : '10px'}}>
               <div style={{...iconCircle, width: isMobile ? '40px' : '50px', height: isMobile ? '40px' : '50px'}}><User color="white" size={isMobile ? 20 : 24} /></div>
               <h3 style={{fontSize: isMobile ? '14px' : '16px'}}>Driver Bhai</h3>
               <p style={{fontSize: isMobile ? '11px' : '13px'}}>Navigation & Docs</p>

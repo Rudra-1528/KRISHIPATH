@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
+import { UserProvider } from './UserContext';
+import { NotificationProvider } from './NotificationContext';
 
 // UBL PAGES
 import Landing from './pages/Landing';
+import Login from './pages/Login';
 import FarmerDashboard from './pages/FarmerDashboard';
 import DriverDashboard from './pages/DriverDashboard';
+import DriverNavigation from './pages/DriverNavigation';
 import AIChatButton from './components/AIChatButton';
+import TransporterAlerts from './pages/TransporterAlerts';
+
+// UBL WRAPPERS
+import FarmerWrapper from './components/FarmerWrapper';
+import DriverWrapper from './components/DriverWrapper';
+import TransporterWrapper from './components/TransporterWrapper';
 
 // ADMIN PAGES
 import Dashboard from './pages/Dashboard';
@@ -16,19 +26,9 @@ import Settings from './pages/Settings';
 import Analytics from './pages/Analytics';
 import Fleet from './pages/Fleet';
 
-// --- HELPER TO FORCE UBL ON REFRESH ---
-const RedirectToUBL = ({ children, lang }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    // If language is lost (refresh happened), go to Landing
-    if (!lang) {
-      navigate('/');
-    }
-  }, [lang, navigate, location]);
-
-  return lang ? children : null;
+// --- ROUTE WRAPPER (no-op now; always renders children) ---
+const RedirectToUBL = ({ children }) => {
+  return children;
 };
 // --- STANDALONE WRAPPER (Provides context for pages outside Layout) ---
 const StandaloneWrapper = ({ lang }) => {
@@ -45,56 +45,65 @@ const StandaloneWrapper = ({ lang }) => {
   return <Outlet context={{ lang, isMobile }} />;
 };
 function App() {
-  // Simple state management for demo purposes
-  const [lang, setLang] = React.useState(null); 
+  const [lang, setLang] = React.useState(() => {
+    const saved = localStorage.getItem('harvest_lang');
+    return saved || 'en';
+  });
+
+  const updateLang = (newLang) => {
+    setLang(newLang);
+    localStorage.setItem('harvest_lang', newLang);
+  }; 
 
   return (
     <BrowserRouter>
-      {/* Global AI Chat */}
-      <AIChatButton />
+      <UserProvider>
+        <NotificationProvider>
+          <AIChatButton lang={lang} />
 
-      <Routes>
-        {/* 1. LANDING PAGE (Language + Role Selection) */}
-        <Route path="/" element={<Landing setLang={setLang} />} />
+          <Routes>
+          <Route path="/" element={<Landing setLang={setLang} />} />
 
-        {/* 2. FARMER (KISAN) - Uses simplified logic */}
-        <Route path="/farmer" element={
-           <RedirectToUBL lang={lang}>
-             <FarmerDashboard />
-           </RedirectToUBL>
-        } />
+          <Route element={<StandaloneWrapper lang={lang} />}>
+            <Route path="/login" element={<RedirectToUBL lang={lang}><Login /></RedirectToUBL>} />
+          </Route>
 
-        {/* 3. DRIVER - Standalone Map & Docs */}
-        <Route element={<StandaloneWrapper lang={lang} />}>
-          <Route path="/driver" element={
-             <RedirectToUBL lang={lang}>
-               <DriverDashboard />
-             </RedirectToUBL>
-          } />
-        </Route>
-        
-        {/* 4. TRANSPORTER - Standalone Fleet Page */}
-        <Route element={<StandaloneWrapper lang={lang} />}>
-          <Route path="/fleet-standalone" element={
-              <RedirectToUBL lang={lang}>
-                 <div style={{ padding: '20px', background: '#f5f5f5', minHeight: '100vh' }}>
-                    <Fleet /> 
-                 </div>
-              </RedirectToUBL>
-          } />
-        </Route>
+          <Route element={<FarmerWrapper lang={lang} setLang={updateLang} />}>
+            <Route path="/farmer" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
+            <Route path="/farmer-crops" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
+            <Route path="/farmer-shipments" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
+            <Route path="/farmer-alerts" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
+            <Route path="/farmer-settings" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
+          </Route>
 
-        {/* 5. ADMIN PANEL (Head Office) */}
-        <Route element={<Layout lang={lang} />}>
-          <Route path="/dashboard" element={<RedirectToUBL lang={lang}><Dashboard /></RedirectToUBL>} />
-          <Route path="/fleet" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
-          <Route path="/routes" element={<RedirectToUBL lang={lang}><RouteAnalysis /></RedirectToUBL>} /> 
-          <Route path="/analytics" element={<RedirectToUBL lang={lang}><Analytics /></RedirectToUBL>} /> 
-          <Route path="/alerts" element={<RedirectToUBL lang={lang}><Alerts /></RedirectToUBL>} />
-          <Route path="/settings" element={<RedirectToUBL lang={lang}><Settings /></RedirectToUBL>} />
-        </Route>
+          <Route element={<DriverWrapper lang={lang} setLang={updateLang} />}>
+            <Route path="/driver" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
+            <Route path="/driver-navigation" element={<RedirectToUBL lang={lang}><DriverNavigation /></RedirectToUBL>} />
+            <Route path="/driver-documents" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
+            <Route path="/driver-alerts" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
+            <Route path="/driver-settings" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
+          </Route>
 
-      </Routes>
+          <Route element={<TransporterWrapper lang={lang} setLang={updateLang} />}>
+            <Route path="/fleet-standalone" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
+            <Route path="/transporter-map" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
+            <Route path="/transporter-analytics" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
+            <Route path="/transporter-routes" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
+            <Route path="/transporter-alerts" element={<RedirectToUBL lang={lang}><TransporterAlerts /></RedirectToUBL>} />
+            <Route path="/transporter-settings" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
+          </Route>
+
+          <Route element={<Layout lang={lang} />}>
+            <Route path="/dashboard" element={<RedirectToUBL lang={lang}><Dashboard /></RedirectToUBL>} />
+            <Route path="/fleet" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
+            <Route path="/routes" element={<RedirectToUBL lang={lang}><RouteAnalysis /></RedirectToUBL>} />
+            <Route path="/analytics" element={<RedirectToUBL lang={lang}><Analytics /></RedirectToUBL>} />
+            <Route path="/alerts" element={<RedirectToUBL lang={lang}><Alerts /></RedirectToUBL>} />
+            <Route path="/settings" element={<RedirectToUBL lang={lang}><Settings /></RedirectToUBL>} />
+          </Route>
+          </Routes>
+        </NotificationProvider>
+      </UserProvider>
     </BrowserRouter>
   );
 }

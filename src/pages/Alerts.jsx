@@ -1,18 +1,50 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { AlertTriangle, Thermometer, Download } from 'lucide-react';
+import { AlertTriangle, Thermometer, Download, Droplets, WifiOff } from 'lucide-react';
 import { translations } from '../translations';
+import { useNotifications } from '../NotificationContext';
 
 const Alerts = () => {
   const { lang, isMobile } = useOutletContext();
-  const t = translations.alerts[lang] || translations.alerts['en'];
+    const t = translations.dashboard[lang] || translations.dashboard['en'];
+    const dashAlert = (key) => translations.dashboard[lang]?.[key] || translations.dashboard['en']?.[key] || key;
+    const { notifications } = useNotifications();
 
-  const [alerts] = useState([
-    { id: 1, truck: "VAC13143", time: "10:45 AM Today", type: "Temperature", val: "12°C", loc: "Nashik Highway", status: "Resolved" },
-    { id: 2, truck: "MH-04-99", time: "09:30 AM Today", type: "Shock", val: "2.5G", loc: "Bhiwandi Bypass", status: "Critical" },
-    { id: 3, truck: "GJ-01-22", time: "Yesterday", type: "Humidity", val: "88%", loc: "Surat Border", status: "Resolved" }
-  ]);
+    const dummyAlerts = useMemo(() => ([
+        { id: 'dummy-1', truck: 'VAC13143', time: '10:45 AM Today', type: t.tempLabel || 'Temperature', val: '12°C', loc: 'Nashik Highway', status: t.resolved || 'Resolved' },
+        { id: 'dummy-2', truck: 'MH-04-99', time: '09:30 AM Today', type: t.shockLabel || 'Shock', val: '2.5G', loc: 'Bhiwandi Bypass', status: t.critical || 'Critical' },
+        { id: 'dummy-3', truck: 'GJ-01-22', time: 'Yesterday', type: t.humidityLabel || 'Humidity', val: '88%', loc: 'Surat Border', status: t.resolved || 'Resolved' }
+    ]), []);
+
+    const liveAlerts = useMemo(() => {
+        const typeLabel = {
+            temperature: 'Temperature',
+            humidity: 'Humidity',
+            shock: 'Shock',
+            connection: 'Connection',
+        };
+
+        return notifications.map((n) => ({
+            id: `live-${n.id}`,
+            truck: n.truck || 'GJ-01-LIVE',
+            time: new Date(n.timestamp || Date.now()).toLocaleTimeString(),
+            type: typeLabel[n.type] || 'Alert',
+            val: n.value || n.message || '—',
+            loc: 'Live sensor feed',
+            status: n.severity === 'critical' ? 'Critical' : 'Warning',
+        }));
+    }, [notifications]);
+
+    const combinedAlerts = useMemo(() => [...liveAlerts, ...dummyAlerts], [liveAlerts, dummyAlerts]);
   const [filter, setFilter] = useState("All");
+
+    const filteredAlerts = useMemo(
+        () => combinedAlerts.filter((a) => filter === 'All' || a.status === filter),
+        [combinedAlerts, filter]
+    );
+
+    const totalIncidents = combinedAlerts.length;
+    const activeIncidents = combinedAlerts.filter((a) => a.status !== 'Resolved').length;
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -32,8 +64,8 @@ const Alerts = () => {
 
         {/* --- SUMMARY CARDS --- */}
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '20px' }}>
-            <div style={summaryCardStyle}><span style={{color: '#d32f2f', fontWeight: 'bold'}}>{t.incidents}</span><span style={{fontSize: '28px', fontWeight: 'bold'}}>24</span></div>
-            <div style={summaryCardStyle}><span style={{color: '#f57c00', fontWeight: 'bold'}}>{t.active}</span><span style={{fontSize: '28px', fontWeight: 'bold'}}>2</span></div>
+            <div style={summaryCardStyle}><span style={{color: '#d32f2f', fontWeight: 'bold'}}>{t.incidents}</span><span style={{fontSize: '28px', fontWeight: 'bold'}}>{totalIncidents}</span></div>
+            <div style={summaryCardStyle}><span style={{color: '#f57c00', fontWeight: 'bold'}}>{t.active}</span><span style={{fontSize: '28px', fontWeight: 'bold'}}>{activeIncidents}</span></div>
             <div style={summaryCardStyle}><span style={{color: 'var(--primary-green)', fontWeight: 'bold'}}>{t.loss}</span><span style={{fontSize: '28px', fontWeight: 'bold'}}>₹ 12,500</span></div>
         </div>
 
@@ -51,17 +83,22 @@ const Alerts = () => {
                     <tr><th style={thStyle}>{t.type}</th><th style={thStyle}>Truck ID</th><th style={thStyle}>{t.val}</th><th style={thStyle}>{t.loc}</th><th style={thStyle}>{t.time}</th><th style={thStyle}>{t.status}</th></tr>
                 </thead>
                 <tbody>
-                    {alerts.filter(a => filter === 'All' || a.status === filter).map(alert => (
+                    {filteredAlerts.map(alert => (
                         <tr key={alert.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                             <td style={{ padding: '15px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold', color: '#333' }}>
-                                {alert.type === 'Temperature' ? <Thermometer size={18} color="#d32f2f"/> : <AlertTriangle size={18} color="#f57c00"/>}{alert.type}
+                                {alert.type === 'Temperature' && <Thermometer size={18} color="#d32f2f"/>}
+                                {alert.type === 'Humidity' && <Droplets size={18} color="#f57c00"/>}
+                                {alert.type === 'Connection' && <WifiOff size={18} color="#d32f2f"/>}
+                                {alert.type === 'Shock' && <AlertTriangle size={18} color="#f57c00"/>}
+                                {!['Temperature','Humidity','Connection','Shock'].includes(alert.type) && <AlertTriangle size={18} color="#f57c00"/>}
+                                {alert.type}
                             </td>
                             <td style={tdStyle}>{alert.truck}</td>
                             <td style={{...tdStyle, color: '#d32f2f', fontWeight: 'bold'}}>{alert.val}</td>
                             <td style={tdStyle}>{alert.loc}</td>
                             <td style={tdStyle}>{alert.time}</td>
                             <td style={tdStyle}>
-                                <span style={{ padding: '5px 10px', borderRadius: '15px', fontSize: '12px', fontWeight: 'bold', background: alert.status === 'Critical' ? '#ffebee' : '#e8f5e9', color: alert.status === 'Critical' ? '#d32f2f' : 'var(--primary-green)' }}>{alert.status}</span>
+                                <span style={{ padding: '5px 10px', borderRadius: '15px', fontSize: '12px', fontWeight: 'bold', background: alert.status === 'Critical' ? '#ffebee' : (alert.status === 'Resolved' ? '#e8f5e9' : '#fff8e1'), color: alert.status === 'Critical' ? '#d32f2f' : (alert.status === 'Resolved' ? 'var(--primary-green)' : '#f57c00') }}>{alert.status}</span>
                             </td>
                         </tr>
                     ))}

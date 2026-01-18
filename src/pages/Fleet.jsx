@@ -1,13 +1,34 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useLocation } from 'react-router-dom';
 import { Search, Phone, User, Battery, Signal, MapPin, Truck, Map } from 'lucide-react';
 import { collection, onSnapshot } from "firebase/firestore"; 
 import { db } from '../firebase'; 
 import { translations } from '../translations';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// --- TRUCK ICON FOR MAP ---
+const truckIcon = new L.Icon({ 
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/2554/2554978.png', 
+    iconSize: [40, 40], 
+    iconAnchor: [20, 20], 
+    popupAnchor: [0, -20] 
+});
+
+const truckIconOffline = new L.Icon({ 
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/2554/2554978.png', 
+    iconSize: [40, 40], 
+    iconAnchor: [20, 20], 
+    popupAnchor: [0, -20],
+    className: 'grayscale-icon'
+});
 
 const Fleet = () => {
   const { lang, isMobile } = useOutletContext(); 
+  const location = useLocation();
   const t = translations.menu[lang] || translations.menu['en'];
+  const isMapView = location.pathname === '/transporter-map';
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentTime, setCurrentTime] = useState(Date.now()); 
@@ -135,6 +156,81 @@ const Fleet = () => {
     t.driver.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // MAP VIEW
+  if (isMapView) {
+    return (
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '15px', background: 'white', borderBottom: '2px solid #2e7d32' }}>
+          <h1 style={{ margin: 0, fontSize: isMobile ? '20px' : '24px', color: '#1b5e20' }}>Live Fleet Map</h1>
+          <p style={{ margin: '5px 0 0 0', color: '#666', fontSize: '14px' }}>Real-time vehicle tracking</p>
+        </div>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <MapContainer 
+            center={[20.5937, 78.9629]} 
+            zoom={5}
+            style={{ height: '100%', width: '100%' }} 
+            zoomControl={true}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            
+            {fleetData.map(truck => {
+              const coords = truck.location.split(',').map(c => parseFloat(c.trim()));
+              const isOffline = truck.signal === 'Offline';
+              
+              return (
+                <Marker 
+                  key={truck.id} 
+                  position={coords} 
+                  icon={isOffline ? truckIconOffline : truckIcon}>
+                  <Popup>
+                    <div style={{ minWidth: '200px' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '8px', color: '#1b5e20' }}>
+                        {truck.id}
+                      </div>
+                      <div style={{ fontSize: '14px', marginBottom: '4px' }}>
+                        <strong>Driver:</strong> {truck.driver}
+                      </div>
+                      <div style={{ fontSize: '14px', marginBottom: '4px' }}>
+                        <strong>Route:</strong> {truck.route}
+                      </div>
+                      <div style={{ fontSize: '14px', marginBottom: '4px' }}>
+                        <strong>Status:</strong> <span style={{ 
+                          color: truck.status === 'Signal Lost' ? '#757575' : truck.status === 'At Risk' ? '#d32f2f' : '#2e7d32',
+                          fontWeight: 'bold' 
+                        }}>{truck.status}</span>
+                      </div>
+                      <div style={{ fontSize: '14px', marginBottom: '4px' }}>
+                        <strong>Battery:</strong> {truck.battery}%
+                      </div>
+                      <div style={{ fontSize: '14px', marginBottom: '4px' }}>
+                        <strong>Signal:</strong> {truck.signal}
+                      </div>
+                      <button 
+                        onClick={() => handleCall(truck.driver, truck.phone)} 
+                        style={{ 
+                          marginTop: '10px', 
+                          width: '100%', 
+                          padding: '8px', 
+                          background: '#2e7d32', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '6px', 
+                          cursor: 'pointer', 
+                          fontWeight: 'bold' 
+                        }}>
+                        Call Driver
+                      </button>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </MapContainer>
+        </div>
+      </div>
+    );
+  }
+
+  // LIST VIEW (DEFAULT)
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px', padding: isMobile ? '12px' : '0' }}>
         

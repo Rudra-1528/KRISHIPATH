@@ -46,6 +46,21 @@ export const translations = {
       alerts: "ગંભીર અલર્ટ",
       settings: "સિસ્ટમ સેટિંગ્સ"
     },
+    gj: { 
+      selectLang: "ભાષા પસંદ કરો", 
+      saveDefault: "ચાલુ રાખો", 
+      name: "ગુજરાતી",
+      headOffice: "હેડ ઓફિસ",
+      kisanView: "કિસાન દૃશ્ય",
+      gadiMaalik: "ગાડી માલિક",
+      driverBhai: "ડ્રાઈવર ભાઈ",
+      dashboard: "ડેશબોર્ડ",
+      fleet: "વાહન વ્યવસ્થાપન",
+      analytics: "ટેલિમેટ્રી લૉગ",
+      routes: "રૂટ વિશ્લેષણ",
+      alerts: "ગંભીર અલર્ટ",
+      settings: "સિસ્ટમ સેટિંગ્સ"
+    },
     pa: { 
       selectLang: "ਭਾਸ਼ਾ ਚੁਣੋ", 
       saveDefault: "ਜਾਰੀ ਰੱਖੋ", 
@@ -58,7 +73,7 @@ export const translations = {
       fleet: "ਫਲੀਟ ਪ੍ਰਬੰਧਨ",
       analytics: "ਟੈਲੀਮੈਟਰੀ ਲੌਗ",
       routes: "ਰੂਟ ਵਿਸ਼ਲੇਸ਼ਣ",
-      alerts: "ਨਾਜ਼ੁਕ ਚੇਤਾਵਨੀਆਂ",
+      alerts: "ਨਾਜ਼ੁਕ ਚੇتਾਵਨੀਆਂ",
       settings: "ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ"
     },
     mr: { 
@@ -77,7 +92,7 @@ export const translations = {
       settings: "सिस्टम सेटिंग्ज"
     },
     bn: { 
-      selectLang: "ভাषা নির্বাচন করুন", 
+      selectLang: "ভাষা নির্বাচন করুন", 
       saveDefault: "চালিয়ে যান", 
       name: "বাংলা",
       headOffice: "হেড অফিস",
@@ -93,103 +108,192 @@ export const translations = {
     },
     ta: { 
       selectLang: "மொழியைத் தேர்ந்தெடுக்கவும்", 
-      saveDefault: "தொடरवum்", 
+      saveDefault: "தொடருங்கள்", 
       name: "தமிழ்",
-      headOffice: "தலைமை அलுவலकम्",
-      kisanView: "விवसायी पार्वे",
-      gadiMaalik: "कार उरिмेयावर्",
-      driverBhai: "ओट्टुนर सकोथरन्",
-      dashboard: "डाश्बोर्डु",
-      fleet: "கப्पर्पदे",
-      analytics: "तोलिसमापन पथिवुकल्",
-      routes: "वझै पকुप्पायवु",
-      alerts: "एच्सरिक्केलिकल्",
-      settings: "अमैप्पुकल्"
+      headOffice: "தலைமை அலுவலகம்",
+      kisanView: "விவசாயী பார்வை",
+      gadiMaalik: "கார் உரிமையாளர்",
+      driverBhai: "ஓட்டுனர் சகோதரன்",
+      dashboard: "டாஷ்போர்டு",
+      fleet: "கப்பற்படை",
+      analytics: "தொலிமாপன பதிவுகள்",
+      routes: "வழி பகுப்பாய்வு",
+      alerts: "எச்சரிக்கைகள்",
+      settings: "அமைப்புகள்"
     },
     te: { 
       selectLang: "భాషను ఎంచుకోండి", 
-      saveDefault: "కొనసాగించండი", 
+      saveDefault: "కొనసాగించండి", 
       name: "తెలుగు",
       headOffice: "ప్రధान కార్యాలయం",
-      kisanView: "రైतు दृश्यम्",
-      gadiMaalik: "गाडि यजमानि",
-      driverBhai: "ड्रायवर् सोदरुडु",
-      dashboard: "डाष्‌बोर्ड्",
-      fleet: "फ्लीट् निर्वहनम्",
-      analytics: "टेलिमेट्री लाग्‌लु",
-      routes: "रूट् विश्लेषणम्",
-      alerts: "हेच्चरिकलु",
-      settings: "अमरिकलु"
+      kisanView: "రైతు దృశ్యం",
+      gadiMaalik: "గాడీ యజమాని",
+      driverBhai: "డ్రైవర్ సోదరుడు",
+      dashboard: "డాష్‌బోర్డ్",
+      fleet: "ఫ్లీట్ నిర్వహణ",
+      analytics: "టెలిమెట్రీ లాగ్‌లు",
+      routes: "రూట్ విశ్లేషణ",
+      alerts: "హెచ్చరికలు",
+      settings: "అమరికలు"
     }
   },
 
   // --- MENU ---
   menu: {
-    en: { dash: "Dashboard", fleet: "Fleet Management", analytics: "Telemetry Logs", routes: "Route Analysis", alerts: "Critical Alerts", settings: "System Settings" },
-    hi: { dash: "डैशबोर्ड", fleet: "वाहन प्रबंधन", analytics: "टेलीमेट्री लॉग", routes: "मार्ग विश्लेषण", alerts: "गंभीर अलर्ट", settings: "सिस्टम सेटिंग्स" },
-    gu: { dash: "ડેશબોર્ડ", fleet: "કાફલો સંચાલન", analytics: "ટેલિમેટ્રી લોગ્સ", routes: "રૂટ વિશ્લેષણ", alerts: "ગંભીર ચેતવણીઓ", settings: "સિસ્ટમ સેટિંગ્સ" },
-    pa: { dash: "ਡੈਸ਼ਬੋਰਡ", fleet: "ਫਲੀਟ ਪ੍ਰਬੰਧਨ", analytics: "ਟੈਲੀਮੈਟਰੀ ਲੌਗਸ", routes: "ਰੂਟ ਵਿਸ਼ਲੇਸ਼ਣ", alerts: "ਨਾਜ਼ੁਕ ਚੇਤਾਵਨੀਆਂ", settings: "ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ" },
-    mr: { dash: "डॅशबोर्ड", fleet: "फ्लीट व्यवस्थापन", analytics: "टेलीमेट्री लॉग", routes: "मार्ग विश्लेषण", alerts: "गंभीर सूचना", settings: "सिस्टम सेटिंग्ज" },
-    bn: { dash: "ড্যাশবোর্ড", fleet: "ফ্লিট ম্যানেজমেন্ট", analytics: "টেলিমেট্রি লগ", routes: "রুট বিশ্লেষণ", alerts: "সতর্কতা", settings: "সিস্টেম সেটিংস" },
-    ta: { dash: "டாஷ்போர்டு", fleet: "கப்பற்படை", analytics: "பதிவுகள்", routes: "வழி பகுப்பாய்வு", alerts: "எச்சரிக்கைகள்", settings: "அமைப்புகள்" },
-    te: { dash: "డాష్‌బోర్డ్", fleet: "ఫ్లీట్ నిర్వహణ", analytics: "టెలిమెట్రీ లాగ్‌లు", routes: "రూట్ విశ్లేషణ", alerts: "హెచ్చరికలు", settings: "అమరికలు" }
+    en: { dash: "Dashboard", fleet: "Fleet Management", analytics: "Telemetry Logs", routes: "Route Analysis", alerts: "Critical Alerts", settings: "System Settings", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" },
+    hi: { dash: "डैशबोर्ड", fleet: "वाहन प्रबंधन", analytics: "टेलीमेट्री लॉग", routes: "मार्ग विश्लेषण", alerts: "गंभीर अलर्ट", settings: "सिस्टम सेटिंग्स", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" },
+    gu: { dash: "ડેશબોર્ડ", fleet: "કાફલો સંચાલન", analytics: "ટેલિમેટ્રી લોગ્સ", routes: "રૂટ વિશ્લેષણ", alerts: "ગંભીર ચેતવણીઓ", settings: "સિસ્ટમ સેટિંગ્સ", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" },
+    gj: { dash: "ડેશબોર્ડ", fleet: "કાફલો સંચાલન", analytics: "ટેલિમેટ્રી લોગ્સ", routes: "રૂટ વિશ્લેષણ", alerts: "ગંભીર ચેતવણીઓ", settings: "સિસ્ટમ સેટિંગ્સ", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" },
+    pa: { dash: "ਡੈਸ਼ਬੋਰਡ", fleet: "ਫਲੀਟ ਪ੍ਰबંधਨ", analytics: "ਟੈਲੀਮੈਟਰੀ ਲੌਗਸ", routes: "ਰੂਟ ਵਿਸ਼ਲਲੇਸ਼ਣ", alerts: "ਨਾਜ਼ੁਕ ਚेतਾਵਨੀਆਂ", settings: "ਸਿਸ्ਟਮ ਸੈਟਿੰਗਾਂ", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" },
+    mr: { dash: "डॅशबोर्ड", fleet: "फ्लीट व्यवस्थापन", analytics: "टेलीमेट्री लॉग", routes: "मार्ग विश्लेषण", alerts: "गंभीर सूचना", settings: "सिस्टम सेटिंग्ज", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" },
+    bn: { dash: "ড্যাশবোর्ড", fleet: "ফ্লিট ম্যানেজমেন্ট", analytics: "টেলিমেট्री লগ", routes: "রুট বিশ্লেষণ", alerts: "সতর্কতা", settings: "সিস्टेম সেটिংস", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" },
+    ta: { dash: "டாஷ్போர्டु", fleet: "கப्பற्படை", analytics: "பதिவुकल", routes: "வழி பกுप्पายvu", alerts: "எച्சरிक्केलिकल", settings: "अमैप्पుकल", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" },
+    te: { dash: "డాష్‌బోర్డ్", fleet: "ఫ్లీట్ నిర్వहण", analytics: "టेలिमेট్రీ లाग్‌లು", routes: "రూట్ విশ్లेషణ", alerts: "హెച्चरिकulu", settings: "అমरिkulù", myCrops: "My Crops", shipments: "Shipments", navigation: "Navigation", documents: "Documents", liveMap: "Live Map" }
   },
 
-  // --- LAYOUT ---
-  layout: {
-    en: { selectLang: "Select Language", saveDefault: "Save preference", name: "English" },
-    hi: { selectLang: "भाषा चुनें", saveDefault: "सहेजें", name: "हिंदी" },
-    gu: { selectLang: "ભાષા પસંદ કરો", saveDefault: "સાચવો", name: "ગુજરાતી" },
-    pa: { selectLang: "ਭਾਸ਼ਾ ਚੁਣੋ", saveDefault: "ਸੇਵ ਕਰੋ", name: "ਪੰਜਾਬੀ" },
-    mr: { selectLang: "भाषा निवडा", saveDefault: "जतन करा", name: "मराठी" },
-    bn: { selectLang: "ভাষা নির্বাচন করুন", saveDefault: "সংরক্ষণ করুন", name: "বাংলা" },
-    ta: { selectLang: "மொழியைத் தேர்ந்தெடுக்கவும்", saveDefault: "சேமி", name: "தமிழ்" },
-    te: { selectLang: "భాషను ఎంచుకోండి", saveDefault: "సేవ్ చేయండి", name: "తెలుగు" }
-  },
-
-  // --- DASHBOARD ---
+  // --- DASHBOARD HEALTH (All Languages - All Parameters) ---
   dashboard: {
-    en: { header: "Logistics Overview", liveShipments: "Live Shipments", truckId: "Truck ID", status: "Status", route: "Active Route", atRisk: "At Risk", good: "Good", systemHealth: "CARGO HEALTH INDEX", generateReport: "Generate Report", temp: "Temp", shock: "Shock", rot: "Rotation", hum: "Humidity", aiSafe: "Safe Transit", aiRisk: "Warning: Spoilage Risk!", analysis: "Real-time fusion analysis" },
-    hi: { header: "लॉजिस्टिक्स अवलोकन", liveShipments: "लाइव शिपमेंट", truckId: "ट्रक आईडी", status: "स्थिति", route: "सक्रिय मार्ग", atRisk: "खतरे में", good: "सुरक्षित", systemHealth: "कार्गो स्वास्थ्य सूचकांक", generateReport: "रिपोर्ट बनाएं", temp: "तापमान", shock: "झटका", rot: "रोटेशन", hum: "नमी", aiSafe: "सुरक्षित पारगमन", aiRisk: "चेतावनी: खराब होने का खतरा!", analysis: "वास्तविक समय विश्लेषण" },
-    gu: { header: "લોજિસ્ટિક્સ ઓવરવ્યુ", liveShipments: "લાઇવ શિપમેન્ટ", truckId: "ટ્રક આઈડી", status: "સ્થિતિ", route: "સક્રિય રૂટ", atRisk: "જોખમમાં", good: "સરસ", systemHealth: "કાર્ગો હેલ્થ ઇન્ડેક્સ", generateReport: "રિપોર્ટ બનાવો", temp: "તાપમાન", shock: "આંચકો", rot: "રોટેશન", hum: "ભેજ", aiSafe: "સુરક્ષિત પરિવહન", aiRisk: "ચેતવણી: બગાડનું જોખમ!", analysis: "રીઅલ-ટાઇમ વિશ્લેષણ" },
-    // (Other languages can fallback to English or be added similarly)
+    en: { 
+      healthIndex: "Cargo Health Index", fresh: "Fresh / Safe", risk: "Spoilage Risk!", offline: "Connection Lost", 
+      aiMonitor: "AI Monitor (SVM):", safe: "✅ Safe Transit", riskDetected: "⚠️ Risk Detected", waiting: "Waiting for connection...", 
+      tempLabel: "Temperature (SHT30)", shockLabel: "Shock (Accel)", rotationLabel: "Rotation Rate", humidityLabel: "Humidity", 
+      syncStatus: "Sync Status:", connected: "Connected", disconnected: "Disconnected",
+      systemHealth: "System Health", analysis: "Real-time analysis", header: "Fleet Status",
+      criticalAlerts: "Critical Alerts (Driver)", noAlerts: "No fleet alerts right now.", items: "items",
+      tempSpiked: "High Temperature", tempHigh: "Spiked to 31°C near Nashik", 
+      humidityLow: "Low Humidity", humidityDropped: "Dropped below 40% during loading", 
+      speedBump: "Speed Bump Hit", shockDetected: "Hard shock detected, check cargo straps",
+      signalDrop: "Signal Drop", signalOutage: "3 min outage near Bhiwandi bypass", 
+      fleetAlert: "Fleet alert", warning: "Warning", critical: "Critical", resolved: "Resolved", 
+      moving: "Moving", active: "Active", signalLost: "Signal Lost", online: "Online"
+    },
+    hi: { 
+      healthIndex: "कार्गो स्वास्थ्य सूचकांक", fresh: "ताजा / सुरक्षित", risk: "खराब होने का जोखिम!", offline: "कनेक्शन खो गया", 
+      aiMonitor: "AI मॉनिटर (SVM):", safe: "✅ सुरक्षित पारगमन", riskDetected: "⚠️ जोखिम का पता चला", waiting: "कनेक्शन की प्रतीक्षा...", 
+      tempLabel: "तापमान (SHT30)", shockLabel: "झटका (Accel)", rotationLabel: "रोटेशन दर", humidityLabel: "नमी", 
+      syncStatus: "सिंक स्थिति:", connected: "जुड़ा हुआ", disconnected: "डिस्कनेक्ट किया गया",
+      systemHealth: "सिस्टम स्वास्थ्य", analysis: "रीयल-टाइम विश्लेषण", header: "वाहन स्थिति",
+      criticalAlerts: "गंभीर चेतावनी", noAlerts: "अभी कोई फ्लीट चेतावनी नहीं।", items: "आइटम",
+      tempSpiked: "उच्च तापमान", tempHigh: "नाशिक के पास 31°C तक बढ़ा", 
+      humidityLow: "कम नमी", humidityDropped: "लोडिंग के दौरान 40% से नीचे गिरा", 
+      speedBump: "स्पीड बम्प हिट", shockDetected: "कठोर झटका महसूस किया गया, कार्गो स्ट्रैप्स की जांच करें",
+      signalDrop: "सिग्नल ड्रॉप", signalOutage: "भिवंडी बाईपास के पास 3 मिनट का आउटेज", 
+      fleetAlert: "फ्लीट चेतावनी", warning: "चेतावनी", critical: "गंभीर", resolved: "समाधान किया गया", 
+      moving: "चल रहा है", active: "सक्रिय", signalLost: "सिग्नल खो गया", online: "ऑनलाइन"
+    },
+    gu: { 
+      healthIndex: "કાર્ગો હેલ્થ ઇન્ડેક્સ", fresh: "તાજું / સુરક્ષિત", risk: "બગાડનું જોખમ!", offline: "કનેક્શન ખોવાયું", 
+      aiMonitor: "AI મોનિટર (SVM):", safe: "✅ સુરક્ષિત પરિવહન", riskDetected: "⚠️ જોખમ મળ્યું", waiting: "કનેક્શનનો ઇંતજાર...", 
+      tempLabel: "તાપમાન (SHT30)", shockLabel: "આઘાત (Accel)", rotationLabel: "રોટેશન દર", humidityLabel: "નમી", 
+      syncStatus: "સિંક સ્થિતિ:", connected: "જોડાયેલ", disconnected: "જોડાણ તોડવામાં આવ્યું",
+      systemHealth: "સિસ્ટમ સ્વાસ્થ્ય", analysis: "રીયલ-ટાઈમ વિશ્લેષણ", header: "ફ્લીટ સ્થિતિ",
+      criticalAlerts: "જટિલ સતર્કતાઓ", noAlerts: "આ સમયે કોઈ ફ્લીટ સતર્કતા નથી।", items: "આઇટમ્સ",
+      tempSpiked: "ઉચ્ચ તાપમાન", tempHigh: "નાશિક પાસે 31°C સુધી વધ્યું", 
+      humidityLow: "નીચી નમી", humidityDropped: "લોડિંગ દરમિયાન 40% ની નીચે ઘટ્યું", 
+      speedBump: "સ્પીડ બમ્પ હીટ", shockDetected: "કડક આઘાત મળ્યો, કાર્ગો સ્ટ્રેપ્સ તપાસો",
+      signalDrop: "સિગ્નલ ડ્રૉપ", signalOutage: "ભીવંડી બાયપાસ પાસે આઉટેજ", 
+      fleetAlert: "ફ્લીટ સતર્કતા", warning: "ચેતવણી", critical: "જટિલ", resolved: "ઉકેલ થયું", 
+      moving: "ચાલી રહ્યું છે", active: "સક્રિય", signalLost: "સિગ્નલ ખોવાયું", online: "ઓનલાઈન"
+    },
+    gj: { 
+      healthIndex: "કાર્ગો હેલ્થ ઇન્ડેક્સ", fresh: "તાજું / સુરક્ષિત", risk: "બગાડનું જોખમ!", offline: "કનેક્શન ખોવાયું", 
+      aiMonitor: "AI મોનિટર (SVM):", safe: "✅ સુરક્ષિત પરિવહન", riskDetected: "⚠️ જોખમ મળ્યું", waiting: "કનેક્શનનો ઇંતજાર...", 
+      tempLabel: "તાપમાન (SHT30)", shockLabel: "આઘાત (Accel)", rotationLabel: "રોટેશન દર", humidityLabel: "નમી", 
+      syncStatus: "સિંક સ્થિતિ:", connected: "જોડાયેલ", disconnected: "જોડાણ તોડવામાં આવ્યું",
+      systemHealth: "સિસ્ટમ સ્વાસ્થ્ય", analysis: "રીયલ-ટાઈમ વિશ્લેષણ", header: "ફ્લીટ સ્થિતિ",
+      criticalAlerts: "જટિલ સતર્કતાઓ", noAlerts: "આ સમયે કોઈ ફ્લીટ સતર્કતા નથી।", items: "આઇટમ્સ",
+      tempSpiked: "ઉચ્ચ તાપમાન", tempHigh: "નાશિક પાસે 31°C સુધી વધ્યું", 
+      humidityLow: "નીચી નમી", humidityDropped: "લોડિંગ દરમિયાન 40% ની નીચે ઘટ્યું", 
+      speedBump: "સ્પીડ બમ્પ હીટ", shockDetected: "કડક આઘાત મળ્યો, કાર્ગો સ્ટ્રેપ્સ તપાસો",
+      signalDrop: "સિગ્નલ ડ્રૉપ", signalOutage: "ભીવંડી બાયપાસ પાસે આઉટેજ", 
+      fleetAlert: "ફ્લીટ સતર્કતા", warning: "ચેતવણી", critical: "જટિલ", resolved: "ઉકેલ થયું", 
+      moving: "ચાલી રહ્યું છે", active: "સક્રિય", signalLost: "સિગ્નલ ખોવાયું", online: "ઓનલાઈન"
+    },
+    pa: { 
+      healthIndex: "ਕਾਰਗੋ ਸਿਹਤ ਸੂਚਕਾਂਕ", fresh: "ਤਾਜਾ / ਸੁਰੱਖਿਅਤ", risk: "ਖਰਾਬੀ ਦਾ ਖਤਰਾ!", offline: "ਕਨੈਕਸ਼ਨ ਖੋ ਗਿਆ", 
+      aiMonitor: "AI ਮਨੀਟਰ (SVM):", safe: "✅ ਸੁਰੱਖਿਅਤ ਟਰਾਂਸਿਟ", riskDetected: "⚠️ ਖਤਰਾ ਖੋਜਿਆ", waiting: "ਕਨੈਕਸ਼ਨ ਦਾ ਇੰਤਜ਼ਾਰ...", 
+      tempLabel: "ਤਾਪਮਾਨ (SHT30)", shockLabel: "ਸਦਮਾ (Accel)", rotationLabel: "ਰੋਟੇਸ਼ਨ ਦਰ", humidityLabel: "ਨਮੀ", 
+      syncStatus: "ਸਿੰਕ ਸਥਿਤੀ:", connected: "ਜੁੜਿਆ ਹੋਇਆ", disconnected: "ਡਿਸਕਨੈਕਟ ਕੀਤਾ ਗਿਆ",
+      systemHealth: "ਸਿਸਟਮ ਹੈਲਥ", analysis: "ਰੀਅਲ-ਟਾਇਮ ਵਿਸ਼ਲੇਸ਼ਣ", header: "ਫਲੀਟ ਸਥਿਤੀ",
+      criticalAlerts: "ਗੰਭੀਰ ਚੇतાਵਨੀਆਂ", noAlerts: "ਇਸ ਸਮੇਂ ਕੋਈ ਫਲੀਟ ਚੇتાਵਨੀ ਨਹੀਂ।", items: "ਆਈਟਮ",
+      tempSpiked: "ਉੱਚ ਤਾਪਮਾਨ", tempHigh: "ਨਾਸ਼ਿਕ ਦੇ ਪਾਸ 31°C ਤੱਕ ਵਧਿਆ", 
+      humidityLow: "ਘੱਟ ਨਮੀ", humidityDropped: "ਲੋਡਿੰਗ ਦੌਰਾਨ 40% ਤੋਂ ਥੱਲੇ", 
+      speedBump: "ਸਪੀਡ ਬੰਪ ਟੱਕ", shockDetected: "ਸਖ਼ਤ ਸਦਮਾ, ਕਾਰਗੋ ਸਟ੍ਰੈਪ ਚੈੱਕ ਕਰੋ",
+      signalDrop: "ਸਿਗਨਲ ਡ੍ਰੌਪ", signalOutage: "ਭਿਵੰਡੀ ਬਾਈਪਾਸ ਕੋਲ ਆਉਟੇਜ", 
+      fleetAlert: "ਫਲੀਟ ਚੇতাਵਨੀ", warning: "ਚੇતাਵਨੀ", critical: "ਗੰਭੀਰ", resolved: "ਹੱਲ ਕੀਤਾ", 
+      moving: "ਚਲ ਰਿਹਾ ਹੈ", active: "ਸਰਗਰਮ", signalLost: "ਸਿਗਨਲ ਗਾਇਬ", online: "ਆਨਲਾਈਨ"
+    },
+    mr: { 
+      healthIndex: "कार्गो आरोग्य निर्देशांक", fresh: "ताज़ा / सुरक्षित", risk: "खराब होने का जोखिम!", offline: "कनेक्शन खोयाला", 
+      aiMonitor: "AI मॉनिटर (SVM):", safe: "✅ सुरक्षित ट्रांजिट", riskDetected: "⚠️ जोखिम मिल गया", waiting: "कनेक्शन की प्रतीक्षा...", 
+      tempLabel: "तापमान (SHT30)", shockLabel: "झटका (Accel)", rotationLabel: "रोटेशन दर", humidityLabel: "आर्दता", 
+      syncStatus: "सिंक स्थिति:", connected: "जुडलेला", disconnected: "डिस्कनेक्ट केला गेला",
+      systemHealth: "सिस्टम आरोग्य", analysis: "रीअल-टाइम विश्लेषण", header: "फ्लीट स्थिति",
+      criticalAlerts: "गंभीर सूचना", noAlerts: "या क्षणी कोणतीही फ्लीट सूचना नाही।", items: "आयटम",
+      tempSpiked: "उच्च तापमान", tempHigh: "नाशिक जवळ 31°C पर्यंत", 
+      humidityLow: "कमी आर्दता", humidityDropped: "लोडिंग दरम्यान 40% खाली", 
+      speedBump: "स्पीड बम्प हिट", shockDetected: "कठोर झटका, मालवाहतूक पट्ट्या तपासा",
+      signalDrop: "सिग्नल ड्रॉप", signalOutage: "भिवंडी बायपास जवळ आउटेज", 
+      fleetAlert: "फ्लीट सूचना", warning: "चेतावणी", critical: "गंभीर", resolved: "सुटके", 
+      moving: "हलत आहे", active: "सक्रिय", signalLost: "सिग्नल हरवला", online: "ऑनलाइन"
+    },
+    bn: { 
+      healthIndex: "কার्গো স্বাস্थ্য সূচক", fresh: "তাজা / নিরাপদ", risk: "পচন ঝুঁকি!", offline: "সংযোগ হারিয়েছে", 
+      aiMonitor: "AI মনিটর (SVM):", safe: "✅ নিরাপদ ট্রানজিট", riskDetected: "⚠️ ঝুঁকি সনাক্ত", waiting: "সংযোগের জন्য অপेक्ষা...", 
+      tempLabel: "তাপমাত्রা (SHT30)", shockLabel: "শক (Accel)", rotationLabel: "ঘূর্ণন হার", humidityLabel: "আর्দ्रता", 
+      syncStatus: "সিঙ্ক अवस्था:", connected: "সংযुक्त", disconnected: "সংयোग बिচ्छिन्न",
+      systemHealth: "सिस्टम स्वास्थ्य", analysis: "রিয়েल-टाইम বिশ्लेषण", header: "फ्लीट अवस्था",
+      criticalAlerts: "गुरुत्वपूर्ण सতर्कता", noAlerts: "এখن কোनো फ্लीট সতर্कता নেই।", items: "আیটেম",
+      tempSpiked: "उच्च तापमान", tempHigh: "নাশিক এর কাছে 31°C", 
+      humidityLow: "कम आर्दता", humidityDropped: "लोडिंग সময় 40% नीचे", 
+      speedBump: "स्पीड बाम्प हीट", shockDetected: "कठिन ड्राफ्ट, कार्गो স्ट्र्यप तपास करो",
+      signalDrop: "सिगन्यल ড्রॉप", signalOutage: "भिवाण्डी byপাস आउटेज", 
+      fleetAlert: "फ्लीট सतร्कता", warning: "সতร্কता", critical: "गुरुত्वपूर्ण", resolved: "সমाधान", 
+      moving: "চलছे", active: "सक्रिय", signalLost: "सिग्नल गायб", online: "অনлाइন"
+    },
+    ta: { 
+      healthIndex: "சरक्कு आरोक्यिய குறियीडু", fresh: "puതിய / बाธुकाप्पु", risk: "कॆट्टुповुम् आबथु!", offline: "इणैप्पु इझ्नथु", 
+      aiMonitor: "AI मणिट्टर (SVM):", safe: "✅ பाধुکാпპான போक्కुवरथु", riskDetected: "⚠️ आबथु कण्डरियबथु", waiting: "इणैப्पिर्क्कु कावु...", 
+      tempLabel: "वेप्पनिलै (SHT30)", shockLabel: "अथिरच्छि (Accel)", rotationLabel: "सुझरच्छि विकिथम्", humidityLabel: "ईरप्पथम्", 
+      syncStatus: "ओत्थिसैप्पु निलै:", connected: "इणैक्कपट्टु", disconnected: "इणैप्पु तुण्डिक्कपट्टु",
+      systemHealth: "सिस्टम आरोक्यम्", analysis: "वाज़्नैल्", header: "फ्लीट निलै",
+      criticalAlerts: "मुक्किमेन हेच्श्क्काय्कल्", noAlerts: "इप्पो नफ्लीट हेच्श्क्काय्कल् इल्लै।", items: "वरिसैकल्",
+      tempSpiked: "उचिक वेप्पनिलै", tempHigh: "नाशिक कारुकु 31°C क्कु उयर्न्थु", 
+      humidityLow: "कुरैन्थ ईरप्पथम्", humidityDropped: "लोडिङ्क सമய 40% क्कु कीझे विझ्हुन्थु", 
+      speedBump: "स्पीड बामप् हीट", shockDetected: "कधु अथिरच्छि, सरक्कु पेल्त् परीक्षा चेयवु",
+      signalDrop: "सिगनल् हरास्", signalOutage: "बिवनडि बाय्पास् кारुку आउटेज्", 
+      fleetAlert: "फ्लीट हेच्श्क्काय्", warning: "हेच्श्क्काय्", critical: "मुक्किमेन", resolved: "तीर्क्कपट्टु", 
+      moving: "नकरुम्", active: "सक्रिय", signalLost: "सिगनल् इझ्नथु", online: "ओनलाय्न्"
+    },
+    te: { 
+      healthIndex: "కార్గো ఆరोग్య సూచిక", fresh: "ताजా / సურక్ష్ితం", risk: "చెడ్డవ్వ ఆపद!", offline: "కనెక్షన్ కోల్పోయింది", 
+      aiMonitor: "AI మానిటర్ (SVM):", safe: "✅ సురక్ష్ित రవాణా", riskDetected: "⚠️ ఆపద గుర్తించబడింది", waiting: "కనెక్션న్ కోసం చేవుతున్నారు...", 
+      tempLabel: "ఉష్ణోగ్రत (SHT30)", shockLabel: "షాక్ (Accel)", rotationLabel: "భ్రమణ రేటు", humidityLabel: "ఆర్ద్రत", 
+      syncStatus: "సింక్ స్థిति:", connected: "సంయోగం చేయబడింది", disconnected: "కనెక్ట్ చేయబడలేదు",
+      systemHealth: "సిస్టమ్ ఆరోగ్యం", analysis: "రియల్-టైమ్ విశ్లేషణ", header: "ఫ్లీట్ స్థిति",
+      criticalAlerts: "విమర్ష్నీయ హెచ్చరికలు", noAlerts: "ఇప్పుడు ఫ్లీట్ హెచ్చరికలు లేవు।", items: "అంశాలు",
+      tempSpiked: "అధిక ఉష్ణోగ్రత", tempHigh: "నాశిక్ పక్కన 31°C", 
+      humidityLow: "తక్కువ ఆర్ద్రత", humidityDropped: "లోడింగ్ సమయంలో 40% కంటే", 
+      speedBump: "స్పీడ్ బంప్ హిట్", shockDetected: "కఠిన షాక్, కార్గో పట్టీలను తనిఖీ చేయండి",
+      signalDrop: "సిగ్నల్ డ్రాप్", signalOutage: "భీవండీ బైపాస్ వద్ద అవుట్‌జ్", 
+      fleetAlert: "ఫ్లీట్ హెచ్చరిక", warning: "హెచ్చరిక", critical: "విమర్ష్నీయ", resolved: "పరిష్కరించబడిన", 
+      moving: "కదులుతూ", active: "చేతన", signalLost: "సిగ్నల్ కోల్పోయింది", online: "ఆన్‌లైన్"
+    }
   },
 
-  // --- ANALYTICS PAGE ---
-  analytics: {
-    en: { title: "Telemetry Logs", total: "Total Shipments", avgTime: "Avg Delivery Time", risk: "Spoilage Rate", rev: "Revenue Protected", tempTrend: "Temperature Stability", status: "Delivery Status", topRoutes: "Top Performing Routes", efficiency: "Efficiency" },
-    hi: { title: "टेलीमेट्री लॉग", total: "कुल शिपमेंट", avgTime: "औसत डिलीवरी समय", risk: "खराब होने की दर", rev: "राजस्व सुरक्षित", tempTrend: "तापमान स्थिरता", status: "डिलीवरी की स्थिति", topRoutes: "शीर्ष प्रदर्शन मार्ग", efficiency: "दक्षता" },
-    gu: { title: "ટેલિમેટ્રી લોગ્સ", total: "કુલ શિપમેન્ટ", avgTime: "સરેરાશ સમય", risk: "બગાડનો દર", rev: "આવક સુરક્ષિત", tempTrend: "તાપમાન સ્થિરતા", status: "ડિલિવરી સ્થિતિ", topRoutes: "શ્રેષ્ઠ રૂટ", efficiency: "કાર્યક્ષમતા" },
-    pa: { title: "ਟੈਲੀਮੈਟਰੀ ਲੌਗਸ", total: "ਕੁੱਲ ਸ਼ਿਪਮੈਂਟ", avgTime: "ਔਸਤ ਸਮਾਂ", risk: "ਖਰਾਬੀ ਦਰ", rev: "ਮਾਲੀਆ ਸੁਰੱਖਿਅਤ", tempTrend: "ਤਾਪਮਾਨ ਸਥਿਰਤਾ", status: "ਡਿਲਿਵਰੀ ਸਥਿਤੀ", topRoutes: "ਵਧੀਆ ਰੂਟ", efficiency: "ਕੁਸ਼ਲਤਾ" }
-  },
-
-  // --- ROUTE ANALYSIS PAGE ---
-  routes: {
-    en: { title: "Route Intelligence", sub: "AI-Powered Path Optimization", start: "Start Point", dest: "Destination", analyzeBtn: "Analyze Best Route", analyzing: "Analyzing Roads...", report: "Analysis Report", time: "Est. Time", dist: "Distance", fuel: "Fuel Cost", risk: "Risk Score", safe: "Safe Route", poor: "Poor Road" },
-    hi: { title: "मार्ग बुद्धिमत्ता", sub: "AI-संचालित पथ अनुकूलन", start: "प्रारंभ बिंदु", dest: "गंतव्य", analyzeBtn: "सर्वोत्तम मार्ग का विश्लेषण करें", analyzing: "विश्लेषण हो रहा है...", report: "विश्लेषण रिपोर्ट", time: "अनुमानित समय", dist: "दूरी", fuel: "ईंधन लागत", risk: "जोखिम स्कोर", safe: "सुरक्षित मार्ग", poor: "खराब सड़क" },
-    gu: { title: "રૂટ ઇન્ટેલિજન્સ", sub: "AI-સંચાલિત ઑપ્ટિમાઇઝેશન", start: "શરૂઆત બિંદુ", dest: "ગંતવ્ય", analyzeBtn: "શ્રેષ્ઠ રૂટ શોધો", analyzing: "વિશ્લેષણ ચાલુ છે...", report: "વિશ્લેષણ રિપોર્ટ", time: "અંદાજિત સમય", dist: "અંતર", fuel: "ઇંધણ ખર્ચ", risk: "જોખમ સ્કોર", safe: "સુરક્ષિત રૂટ", poor: "ખરાબ રસ્તો" },
-    pa: { title: "ਰੂਟ ਇੰਟੈਲੀਜੈਂਸ", sub: "AI ਰੂਟ ਖੋਜ", start: "ਸ਼ੁਰੂਆਤੀ ਬਿੰਦੂ", dest: "ਮੰਜ਼ਿਲ", analyzeBtn: "ਵਧੀਆ ਰੂਟ ਲੱਭੋ", analyzing: "ਵਿਸ਼ਲੇਸ਼ਣ ਹੋ ਰਿਹਾ ਹੈ...", report: "ਰਿਪੋਰਟ", time: "ਸਮਾਂ", dist: "ਦੂਰੀ", fuel: "ਬਾਲਣ ਦੀ ਲਾਗਤ", risk: "ਖਤਰਾ ਸਕੋਰ", safe: "ਸੁਰੱਖਿਅਤ ਰੂਟ", poor: "ਖਰਾਬ ਸੜਕ" }
-  },
-
-  // --- ALERTS PAGE ---
-  alerts: {
-    en: { title: "Critical Risk Log", sub: "Evidence for insurance claims", export: "Export PDF", incidents: "Total Incidents", active: "Active Threats", loss: "Est. Loss", type: "Alert Type", val: "Value", loc: "Location", time: "Time", status: "Status" },
-    hi: { title: "गंभीर जोखिम लॉग", sub: "बीमा दावों के लिए सबूत", export: "PDF निर्यात करें", incidents: "कुल घटनाएं", active: "सक्रिय खतरे", loss: "अनुमानित नुकसान", type: "अलर्ट प्रकार", val: "मान", loc: "स्थान", time: "समय", status: "स्थिति" },
-    gu: { title: "ગંભીર જોખમ લોગ", sub: "વીમા દાવા માટે પુરાવા", export: "PDF ડાઉનલોડ", incidents: "કુલ ઘટનાઓ", active: "સક્રિય ધમકીઓ", loss: "અંદાજિત નુકસાન", type: "પ્રકાર", val: "મૂલ્ય", loc: "સ્થાન", time: "સમય", status: "સ્થિતિ" },
-    pa: { title: "ਨਾਜ਼ੁਕ ਖਤਰਾ ਲੌਗ", sub: "ਬੀਮੇ ਲਈ ਸਬੂਤ", export: "PDF ਐਕਸਪੋਰਟ", incidents: "ਕੁੱਲ ਘਟਨਾਵਾਂ", active: "ਸਰਗਰਮ ਖਤਰੇ", loss: "ਨੁਕਸਾਨ", type: "ਕਿਸਮ", val: "ਮੁੱਲ", loc: "ਸਥਾਨ", time: "ਸਮਾਂ", status: "ਸਥਿਤੀ" }
-  },
-
-  // --- CITIES ---
+  // --- CITIES TRANSLATION ---
   cities: {
+    "Lavad": { en: "Lavad", hi: "लवाड़", gu: "લવાડ", pa: "ਲਵਾਡ", mr: "लवाड", bn: "লভাড", ta: "ளভாड", te: "లవాడ" },
+    "Gandhinagar": { en: "Gandhinagar", hi: "गांधीनगर", gu: "ગાંધીનગર", pa: "ਗਾਂਧੀਨਗਰ", mr: "गांधीनगर", bn: "গান্ধীনগর", ta: "கந்திநகர்", te: "గాంధీనగర" },
+    "Pune": { en: "Pune", hi: "पुणे", gu: "પુણે", pa: "ਪੁਣੇ", mr: "पुणे", bn: "পুণে", ta: "புணে", te: "పూణె" },
     "Mumbai": { en: "Mumbai", hi: "मुंबई", gu: "મુંબઈ", pa: "ਮੁੰਬਈ", mr: "मुंबई", bn: "মুম্বাই", ta: "மும்பை", te: "ముంబై" },
-    "Pune": { en: "Pune", hi: "पुणे", gu: "પુણે", pa: "ਪੁਣੇ", mr: "पुणे", bn: "পুনে", ta: "புனே", te: "పుణే" },
-    "Nashik": { en: "Nashik", hi: "नासिक", gu: "નાસિક", pa: "ਨਾਸਿਕ", mr: "नाशिक", bn: "নাসিক", ta: "நாசிக்", te: "నాసిక్" },
+    "Nashik": { en: "Nashik", hi: "नाशिक", gu: "નાશીક", pa: "ਨਾਸ਼ਿਕ", mr: "नाशिक", bn: "নাশিক", ta: "நாசிக்", te: "నాశిక్" },
     "Surat": { en: "Surat", hi: "सूरत", gu: "સુરત", pa: "ਸੂਰਤ", mr: "सुरत", bn: "সুরাট", ta: "சூரத்", te: "సూరత్" },
-    "Vadodara": { en: "Vadodara", hi: "वडोदरा", gu: "વડોદરા", pa: "ਵਡੋਦਰਾ", mr: "वडोदरा", bn: "ভদোদরা", ta: "வதோதரா", te: "వడోదర" },
-    "Delhi": { en: "Delhi", hi: "दिल्ली", gu: "દિલ્હી", pa: "ਦਿੱਲੀ", mr: "दिल्ली", bn: "দিল্লি", ta: "டெல்லி", te: "ఢిల్లీ" },
-    "Ahmedabad": { en: "Ahmedabad", hi: "अहमदाबाद", gu: "અમદાવાદ", pa: "ਅਹਿਮਦਾਬਾਦ", mr: "अहमदाबाद", bn: "আহমেদাবাদ", ta: "அகமதாபாத்", te: "అహ్మదాబాద్" },
-    "Bangalore": { en: "Bangalore", hi: "बंगलौर", gu: "બેંગ્લોર", pa: "ਬੈਂਗਲੁਰੂ", mr: "बेंगळुरू", bn: "বেঙ্গালুরু", ta: "பெங்களூரு", te: "బెంగళూరు" },
-    "Chennai": { en: "Chennai", hi: "चेन्नई", gu: "ચેન્નાઈ", pa: "ਚੇਨਈ", mr: "चेन्नई", bn: "চেন্নাই", ta: "சென்னை", te: "చెన్నై" },
-    "Hyderabad": { en: "Hyderabad", hi: "हैदराबाद", gu: "હૈદરાબાદ", pa: "ਹੈਦਰਾਬਾਦ", mr: "हैदराबाद", bn: "হায়দরাবাদ", ta: "ஹைதராபாத்", te: "హైదరాబాద్" }
+    "Vadodara": { en: "Vadodara", hi: "वडोदरा", gu: "વડોદરા", pa: "ਵਡੋਦਰਾ", mr: "वडोदरा", bn: "ভদোদরা", ta: "வதோதरा", te: "వడోదర" },
+    "Delhi": { en: "Delhi", hi: "दिल्ली", gu: "દિલ્હી", pa: "ਦਿੱਲੀ", mr: "दिल्ली", bn: "দিল्লি", ta: "டெல्लி", te: "ఢిల्లీ" },
+    "Ahmedabad": { en: "Ahmedabad", hi: "अहमदाबाद", gu: "અમદાવાદ", pa: "ਅਹਿਮਦਾਬਾਦ", mr: "अहमदाबाद", bn: "আহমেদाবाद", ta: "அகமதாபாத्", te: "అహ్మదాబాద्" },
+    "Bangalore": { en: "Bangalore", hi: "बंगलौर", gu: "બેંગ્લોર", pa: "ਬੈਂਗਲুरూ", mr: "बेंगळुरू", bn: "বেঙ्গালुরु", ta: "பெங்களூरு", te: "బెంగళూరు" },
+    "Chennai": { en: "Chennai", hi: "चेन्नई", gu: "ચેન્નાઈ", pa: "ਚੇनई", mr: "चेन्नई", bn: "চেन्नाই", ta: "சென्नை", te: "చెన్నై" },
+    "Hyderabad": { en: "Hyderabad", hi: "हैदराबाद", gu: "હૈદરાબાદ", pa: "ਹੈदรાબાদ", mr: "हैदराबाद", bn: "হায়दরাबाद", ta: "ஹைतराபாத्", te: "హైదరాబాద्" }
   }
 };

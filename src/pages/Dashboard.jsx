@@ -212,10 +212,10 @@ const Dashboard = () => {
                             <span style={{ fontSize: '13px', color: '#888' }}>{selectedTruck.isOffline ? "CONNECTION LOST" : t.analysis}</span>
                         </div>
                         <div style={{ background: '#fcfcfc', borderRadius: '12px', padding: '15px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px solid #eee' }}>
-                            <Row label="Temp (SHT30)" value={`${selectedTruck.sensors.temp}°C`} />
-                            <Row label="Shock (Accel)" value={`${selectedTruck.shock}G`} color={selectedTruck.isOffline ? "#999" : "var(--primary-green)"} bold />
-                            <Row label="Rotation" value={`${selectedTruck.rotation}°/s`} />
-                            <Row label="Humidity" value={`${selectedTruck.sensors.humidity || 0}%`} />
+                            <Row label={t.tempLabel || "Temp (SHT30)"} value={`${selectedTruck.sensors.temp}°C`} />
+                            <Row label={t.shockLabel || "Shock (Accel)"} value={`${selectedTruck.shock}G`} color={selectedTruck.isOffline ? "#999" : "var(--primary-green)"} bold />
+                            <Row label={t.rotationLabel || "Rotation"} value={`${selectedTruck.rotation}°/s`} />
+                            <Row label={t.humidityLabel || "Humidity"} value={`${selectedTruck.sensors.humidity || 0}%`} />
                         </div>
                         <div style={{ background: selectedTruck.isOffline ? '#eeeeee' : selectedTruck.status === 'At Risk' ? '#ffebee' : '#e3f2fd', padding: '15px', borderRadius: '12px', borderLeft: selectedTruck.isOffline ? '4px solid #999' : selectedTruck.status === 'At Risk' ? '4px solid #d32f2f' : '4px solid #1976d2' }}>
                             <div style={{ fontSize: '12px', color: selectedTruck.isOffline ? '#666' : '#1565c0', fontWeight: '700', marginBottom: '4px' }}>AI Monitor (SVM):</div>
@@ -224,9 +224,9 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#666' }}>
-                             <span style={{ fontWeight: '500' }}>Sync Status:</span>
+                             <span style={{ fontWeight: '500' }}>{t.syncStatus || 'Sync Status:'}</span>
                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: selectedTruck.isOffline ? 'grey' : '#2e7d32' }}></span>
-                             <span style={{ color: selectedTruck.isOffline ? 'grey' : '#2e7d32', fontWeight: '700' }}>{selectedTruck.isOffline ? "Disconnected" : "Live"}</span>
+                             <span style={{ color: selectedTruck.isOffline ? 'grey' : '#2e7d32', fontWeight: '700' }}>{selectedTruck.isOffline ? (t.disconnected || "Disconnected") : (t.connected || "Live")}</span>
                         </div>
                     </>
                 ) : (

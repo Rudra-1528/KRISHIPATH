@@ -1,36 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Menu, X, LogOut, Globe, AlertTriangle, Thermometer, Droplets, Zap, WifiOff } from 'lucide-react';
-import { translations } from '../translations'; 
+import TransporterSidebar from './TransporterSidebar';
 import { useUser } from '../UserContext';
 import { useNotifications } from '../NotificationContext';
+import { translations } from '../translations';
 
-const Layout = () => {
+const TransporterWrapper = ({ lang, setLang }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useUser();
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
-  const navigate = useNavigate();
-  const [lang, setLang] = useState('en'); 
-  const [showLangModal, setShowLangModal] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const location = useLocation();
+  const [showLangModal, setShowLangModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const auth = translations.auth?.[lang] || translations.auth?.en || {};
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024; // Treat tablets as mobile for sidebar logic
+      const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
       if (!mobile) setIsSidebarOpen(true); else setIsSidebarOpen(false);
     };
     window.addEventListener('resize', handleResize);
-    handleResize(); 
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => { if (isMobile) setIsSidebarOpen(false); }, [location, isMobile]);
 
-  const handleLanguageSelectFromButton = (newLang) => {
+  useEffect(() => {
+    if (!user || user.role !== 'transporter') navigate('/');
+  }, [user, navigate]);
+
+  const handleLogout = () => { logout(); navigate('/'); };
+
+  const handleLanguageSelect = (newLang) => {
     setLang(newLang);
     localStorage.setItem('harvest_lang', newLang);
     setShowLangModal(false);
@@ -39,12 +45,12 @@ const Layout = () => {
   const languages = [
     { code: 'en', label: '🇬🇧 English' },
     { code: 'hi', label: '🇮🇳 Hindi (हिंदी)' },
-    { code: 'gj', label: '🇮🇳 Gujarati (ગુજરાતી)' },
+    { code: 'gu', label: '🇮🇳 Gujarati (ગુજરાતી)' },
     { code: 'pa', label: '🇮🇳 Punjabi (ਪੰਜਾਬੀ)' },
     { code: 'mr', label: '🇮🇳 Marathi (मराठी)' },
     { code: 'ta', label: '🇮🇳 Tamil (தமிழ்)' },
     { code: 'te', label: '🇮🇳 Telugu (తెలుగు)' },
-    { code: 'bn', label: '🇮🇳 Bengali (বাংলা)' },
+    { code: 'bn', label: '🇮🇳 Bengali (বाংলा)' },
   ];
 
   const getNotificationIcon = (type) => {
@@ -57,22 +63,18 @@ const Layout = () => {
     }
   };
 
-  const t = translations.layout[lang] || translations.layout['en'];
-
-  const auth = translations.auth?.[lang] || translations.auth?.en || {};
-  const handleLogout = () => { logout(); navigate('/'); };
+  if (!user) return null;
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#f4f1ea' }}>
-      
-      {/* LANGUAGE MODAL FOR BUTTON */}
+      {/* LANGUAGE MODAL */}
       {showLangModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
           <div style={{ background: 'white', padding: '30px', borderRadius: '16px', textAlign: 'center', width: '90%', maxWidth: '400px' }}>
             <h2 style={{ marginBottom: '20px', color: '#2e7d32', fontSize: '22px' }}>Select Language / भाषा चुनें</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '25px', maxHeight: '300px', overflowY: 'auto' }}>
               {languages.map((l) => (
-                <button key={l.code} onClick={() => handleLanguageSelectFromButton(l.code)} style={{ padding: '12px', fontSize: '14px', cursor: 'pointer', background: l.code === lang ? '#a5d6a7' : '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', transition: 'background 0.2s', fontWeight: l.code === lang ? '600' : '400' }}>
+                <button key={l.code} onClick={() => handleLanguageSelect(l.code)} style={{ padding: '12px', fontSize: '14px', cursor: 'pointer', background: l.code === lang ? '#a5d6a7' : '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', transition: 'background 0.2s', fontWeight: l.code === lang ? '600' : '400' }}>
                   {l.label}
                 </button>
               ))}
@@ -83,43 +85,28 @@ const Layout = () => {
           </div>
         </div>
       )}
-
-      {/* --- SIDEBAR CONTAINER --- */}
-      {/* KEY FIX: 'relative' pushes content. 'fixed' overlaps content. */}
-      <div style={{
-          position: isMobile ? 'fixed' : 'relative', 
-          width: '240px', 
-          height: '100%', 
-          zIndex: 1000,
-          transition: 'margin-left 0.3s ease',
-          marginLeft: isSidebarOpen ? '0' : '-240px', // Slide logic
-          flexShrink: 0
-      }}>
-          <Sidebar lang={lang} />
-          {/* Close Button (Mobile Only) */}
-          {isMobile && isSidebarOpen && (
-            <button onClick={() => setIsSidebarOpen(false)} style={{ position: 'absolute', top: '20px', right: '-40px', background: 'white', border: 'none', borderRadius: '50%', padding: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-              <X size={20} color="#333" />
-            </button>
-          )}
+      
+      <div style={{ position: isMobile ? 'fixed' : 'relative', width: '240px', height: '100%', zIndex: 1000, transition: 'margin-left 0.3s ease', marginLeft: isSidebarOpen ? '0' : '-240px', flexShrink: 0 }}>
+        <TransporterSidebar lang={lang} />
+        {isMobile && isSidebarOpen && (
+          <button onClick={() => setIsSidebarOpen(false)} style={{ position: 'absolute', top: '20px', right: '-40px', background: 'white', border: 'none', borderRadius: '50%', padding: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+            <X size={20} color="#333" />
+          </button>
+        )}
       </div>
 
-      {/* OVERLAY (Mobile Only) */}
       {isMobile && isSidebarOpen && (
         <div onClick={() => setIsSidebarOpen(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 999 }}></div>
       )}
 
-      {/* --- MAIN CONTENT --- */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: '0' }}>
-        
-        {/* TOP BAR */}
         <div style={{ height: '65px', background: 'white', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', padding: '0 20px', justifyContent: 'space-between', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            {isMobile && <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><Menu size={28} color="#2d5a27" /></button>}
-            <h3 style={{ margin: 0, color: '#2d5a27', fontSize: '18px', fontWeight: '800', letterSpacing: '0.5px' }}>Harvest Link</h3>
+            {isMobile && <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><Menu size={28} color="var(--primary-green)" /></button>}
+            <h3 style={{ margin: 0, color: 'var(--primary-green)', fontSize: '18px', fontWeight: '800', letterSpacing: '0.5px' }}>Harvest Link - Gaadi Maalik</h3>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div style={{ position: 'relative' }}>
               <div onClick={() => setShowNotifications(!showNotifications)} style={{ cursor: 'pointer', color: '#5d4037', position: 'relative' }}>
                 <Bell size={22} />
@@ -155,7 +142,7 @@ const Layout = () => {
                         <div
                           key={notif.id}
                           onClick={() => markAsRead(notif.id)}
-                          style={{ padding: '12px 15px', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', background: notif.isRead ? 'white' : '#fff3e0', transition: 'background 0.2s' }}
+                          style={{ padding: '12px 15px', borderBottom: '1px solid ' + '#f5f5f5', cursor: 'pointer', background: notif.isRead ? 'white' : '#fff3e0', transition: 'background 0.2s' }}
                           onMouseOver={(e) => (e.currentTarget.style.background = '#f5f5f5')}
                           onMouseOut={(e) => (e.currentTarget.style.background = notif.isRead ? 'white' : '#fff3e0')}
                         >
@@ -176,30 +163,27 @@ const Layout = () => {
                 </div>
               )}
             </div>
-            {user && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderLeft: '1px solid #eee', paddingLeft: '15px' }}>
-                <div style={{ fontSize: '12px' }}>
-                  <div style={{ fontWeight: 'bold', color: '#333' }}>{user.name || 'User'}</div>
-                  <div style={{ fontSize: '10px', color: '#999' }}>{user.email || user.role}</div>
-                </div>
-                <button onClick={() => setShowLangModal(true)} style={{ background: '#2e7d32', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#1b5e20'} onMouseOut={(e) => e.currentTarget.style.background = '#2e7d32'}>
-                  <Globe size={14} /> {auth.changeLanguage || 'Language'}
-                </button>
-                <button onClick={handleLogout} style={{ background: '#d32f2f', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#b71c1c'} onMouseOut={(e) => e.currentTarget.style.background = '#d32f2f'}>
-                  <LogOut size={14} /> {auth.logout || 'Logout'}
-                </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderLeft: '1px solid #eee', paddingLeft: '15px' }}>
+              <div style={{ fontSize: '12px' }}>
+                <div style={{ fontWeight: 'bold', color: '#333' }}>{user.name || 'User'}</div>
+                <div style={{ fontSize: '10px', color: '#999' }}>{user.email || user.role}</div>
               </div>
-            )}
+              <button onClick={() => setShowLangModal(true)} style={{ background: '#2e7d32', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#1b5e20'} onMouseOut={(e) => e.currentTarget.style.background = '#2e7d32'}>
+                <Globe size={14} /> {auth.changeLanguage || 'Language'}
+              </button>
+              <button onClick={handleLogout} style={{ background: '#d32f2f', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#b71c1c'} onMouseOut={(e) => e.currentTarget.style.background = '#d32f2f'}>
+                <LogOut size={14} /> {auth.logout || 'Logout'}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* PAGE */}
-        <div style={{ padding: isMobile ? '15px' : '25px', flex: 1, overflowY: 'auto' }}>
-           <Outlet context={{ lang, isMobile }} />
+        <div style={{ flex: 1, overflow: 'auto', padding: '0' }}>
+          <Outlet context={{ lang, isMobile }} />
         </div>
       </div>
     </div>
   );
 };
 
-export default Layout;
+export default TransporterWrapper;
