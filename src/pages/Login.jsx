@@ -70,7 +70,7 @@ const Login = () => {
 		<div style={{
 			minHeight: '100vh',
 			width: '100%',
-			background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2664&auto=format&fit=crop")',
+			background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("/images/landing-bg.jpg")',
 			backgroundSize: 'cover',
 			backgroundPosition: 'center',
 			display: 'flex',

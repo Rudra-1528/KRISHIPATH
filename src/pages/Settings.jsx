@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import { User, Bell, Globe, Shield, LogOut, Save } from 'lucide-react';
+import { useUser } from '../UserContext';
 
 const Settings = () => {
   // Get global language setter from Outlet Context
   const { lang, setLang, isMobile } = useOutletContext();
+  const { user, logout } = useUser();
+  const navigate = useNavigate();
   
   const [notifications, setNotifications] = useState({
     email: true,
@@ -14,13 +17,43 @@ const Settings = () => {
 
   // Local state for dropdown (syncs with global lang initially)
   const [selectedLang, setSelectedLang] = useState(lang);
+  const [saveStatus, setSaveStatus] = useState('');
 
   const handleSave = () => {
-    // 1. Update Global Language (Instant, no reload needed)
+    // 1. Save to localStorage first
+    localStorage.setItem('harvest_lang', selectedLang);
+    localStorage.setItem('harvest_lang_selected', 'true');
+    
+    // 2. Update Global Language (Instant, no reload needed)
     setLang(selectedLang);
     
-    // 2. Mock Save for others
-    alert("Settings Saved Successfully! Language updated.");
+    // 3. Dispatch custom event for all components to listen
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: selectedLang } }));
+    
+    // 4. Show success message
+    setSaveStatus('✓ Settings saved successfully!');
+    setTimeout(() => setSaveStatus(''), 3000);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Get user initials for avatar
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  // Capitalize role
+  const capitalizeRole = (role) => {
+    if (!role) return 'User';
+    return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
   return (
@@ -40,30 +73,32 @@ const Settings = () => {
             <div style={{ background: 'white', borderRadius: '12px', padding: isMobile ? '20px' : '30px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', textAlign: 'center', height: 'fit-content' }}>
                 <div style={{ position: 'relative', display: 'inline-block' }}>
                     <div style={{ width: isMobile ? '80px' : '100px', height: isMobile ? '80px' : '100px', borderRadius: '50%', background: '#004d40', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isMobile ? '28px' : '36px', fontWeight: 'bold', margin: '0 auto' }}>
-                        RP
+                        {getInitials(user?.name)}
                     </div>
                     <div style={{ position: 'absolute', bottom: '0', right: '0', background: '#2e7d32', width: '20px', height: '20px', borderRadius: '50%', border: '3px solid white' }}></div>
                 </div>
                 
-                <h2 style={{ marginTop: isMobile ? '12px' : '15px', marginBottom: '5px', color: '#333', fontSize: isMobile ? '16px' : '18px' }}>Rudra Pratap</h2>
-                <span style={{ background: '#e8f5e9', color: '#2e7d32', padding: '4px 12px', borderRadius: '15px', fontSize: '11px', fontWeight: 'bold' }}>Admin</span>
+                <h2 style={{ marginTop: isMobile ? '12px' : '15px', marginBottom: '5px', color: '#333', fontSize: isMobile ? '16px' : '18px' }}>{user?.name || 'User'}</h2>
+                <span style={{ background: '#e8f5e9', color: '#2e7d32', padding: '4px 12px', borderRadius: '15px', fontSize: '11px', fontWeight: 'bold' }}>{capitalizeRole(user?.role)}</span>
 
                 <div style={{ marginTop: isMobile ? '15px' : '20px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: isMobile ? '10px' : '15px' }}>
                     <div style={{...infoRowStyle, fontSize: isMobile ? '12px' : '14px'}}>
                         <span style={{color:'#888'}}>Role:</span>
-                        <strong>Logistics Manager</strong>
+                        <strong>{capitalizeRole(user?.role)}</strong>
                     </div>
                     <div style={{...infoRowStyle, fontSize: isMobile ? '12px' : '14px'}}>
                         <span style={{color:'#888'}}>Email:</span>
-                        <strong style={{fontSize: isMobile ? '11px' : '14px'}}>rudra@harvestlink.in</strong>
+                        <strong style={{fontSize: isMobile ? '11px' : '14px'}}>{user?.email || 'N/A'}</strong>
                     </div>
-                    <div style={{...infoRowStyle, fontSize: isMobile ? '12px' : '14px'}}>
-                        <span style={{color:'#888'}}>Phone:</span>
-                        <strong>+91 98765 43210</strong>
-                    </div>
+                    {user?.loginTime && (
+                        <div style={{...infoRowStyle, fontSize: isMobile ? '12px' : '14px'}}>
+                            <span style={{color:'#888'}}>Last Login:</span>
+                            <strong style={{fontSize: isMobile ? '11px' : '12px'}}>{new Date(user.loginTime).toLocaleString()}</strong>
+                        </div>
+                    )}
                 </div>
 
-                <button style={{ marginTop: isMobile ? '15px' : '25px', width: '100%', padding: isMobile ? '10px' : '12px', border: '1px solid #d32f2f', color: '#d32f2f', background: 'white', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold', fontSize: isMobile ? '12px' : '14px' }}>
+                <button onClick={handleLogout} style={{ marginTop: isMobile ? '15px' : '25px', width: '100%', padding: isMobile ? '10px' : '12px', border: '1px solid #d32f2f', color: '#d32f2f', background: 'white', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold', fontSize: isMobile ? '12px' : '14px' }}>
                     <LogOut size={isMobile ? 16 : 18} /> Sign Out
                 </button>
             </div>
@@ -127,12 +162,19 @@ const Settings = () => {
                 </div>
 
                 {/* SAVE BUTTON */}
-                <button 
-                    onClick={handleSave}
-                    style={{ padding: isMobile ? '12px' : '15px', background: '#1b5e20', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: isMobile ? '13px' : '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
-                >
-                    <Save size={isMobile ? 18 : 20} /> Save Changes
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <button 
+                        onClick={handleSave}
+                        style={{ padding: isMobile ? '12px' : '15px', background: '#1b5e20', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: isMobile ? '13px' : '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                    >
+                        <Save size={isMobile ? 18 : 20} /> Save Changes
+                    </button>
+                    {saveStatus && (
+                        <div style={{ padding: '10px', background: '#e8f5e9', color: '#2e7d32', borderRadius: '8px', textAlign: 'center', fontSize: isMobile ? '12px' : '14px', fontWeight: 'bold' }}>
+                            {saveStatus}
+                        </div>
+                    )}
+                </div>
 
             </div>
         </div>

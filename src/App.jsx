@@ -50,9 +50,31 @@ function App() {
     return saved || 'en';
   });
 
+  // Listen for storage changes from other tabs/windows
+  React.useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'harvest_lang' && e.newValue) {
+        setLang(e.newValue);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Listen for language changes from Settings or other components
+  React.useEffect(() => {
+    const handleLanguageChange = (e) => {
+      setLang(e.detail.lang);
+    };
+    window.addEventListener('languageChanged', handleLanguageChange);
+    return () => window.removeEventListener('languageChanged', handleLanguageChange);
+  }, []);
+
   const updateLang = (newLang) => {
     setLang(newLang);
     localStorage.setItem('harvest_lang', newLang);
+    // Dispatch custom event for same-tab updates
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: newLang } }));
   }; 
 
   return (
@@ -73,7 +95,7 @@ function App() {
             <Route path="/farmer-crops" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
             <Route path="/farmer-shipments" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
             <Route path="/farmer-alerts" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
-            <Route path="/farmer-settings" element={<RedirectToUBL lang={lang}><FarmerDashboard /></RedirectToUBL>} />
+            <Route path="/farmer-settings" element={<RedirectToUBL lang={lang}><Settings /></RedirectToUBL>} />
           </Route>
 
           <Route element={<DriverWrapper lang={lang} setLang={updateLang} />}>
@@ -81,7 +103,7 @@ function App() {
             <Route path="/driver-navigation" element={<RedirectToUBL lang={lang}><DriverNavigation /></RedirectToUBL>} />
             <Route path="/driver-documents" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
             <Route path="/driver-alerts" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
-            <Route path="/driver-settings" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
+            <Route path="/driver-settings" element={<RedirectToUBL lang={lang}><Settings /></RedirectToUBL>} />
           </Route>
 
           <Route element={<TransporterWrapper lang={lang} setLang={updateLang} />}>
@@ -90,7 +112,7 @@ function App() {
             <Route path="/transporter-analytics" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
             <Route path="/transporter-routes" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
             <Route path="/transporter-alerts" element={<RedirectToUBL lang={lang}><TransporterAlerts /></RedirectToUBL>} />
-            <Route path="/transporter-settings" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
+            <Route path="/transporter-settings" element={<RedirectToUBL lang={lang}><Settings /></RedirectToUBL>} />
           </Route>
 
           <Route element={<Layout lang={lang} />}>

@@ -10,8 +10,15 @@ const Layout = () => {
   const { user, logout } = useUser();
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
   const navigate = useNavigate();
-  const [lang, setLang] = useState('en'); 
-  const [showLangModal, setShowLangModal] = useState(false);
+  const [lang, setLang] = useState(() => {
+    const saved = localStorage.getItem('harvest_lang');
+    return saved || 'en';
+  }); 
+  const [showLangModal, setShowLangModal] = useState(() => {
+    const userSelected = localStorage.getItem('harvest_lang_selected');
+    return !userSelected;
+  });
+  const [saveDefault, setSaveDefault] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -30,9 +37,20 @@ const Layout = () => {
 
   useEffect(() => { if (isMobile) setIsSidebarOpen(false); }, [location, isMobile]);
 
+  // Listen for language changes from Settings or other components
+  useEffect(() => {
+    const handleLanguageChange = (e) => {
+      setLang(e.detail.lang);
+    };
+    window.addEventListener('languageChanged', handleLanguageChange);
+    return () => window.removeEventListener('languageChanged', handleLanguageChange);
+  }, []);
+
   const handleLanguageSelectFromButton = (newLang) => {
     setLang(newLang);
     localStorage.setItem('harvest_lang', newLang);
+    localStorage.setItem('harvest_lang_selected', 'true');
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: newLang } }));
     setShowLangModal(false);
   };
 
@@ -70,15 +88,27 @@ const Layout = () => {
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
           <div style={{ background: 'white', padding: '30px', borderRadius: '16px', textAlign: 'center', width: '90%', maxWidth: '400px' }}>
             <h2 style={{ marginBottom: '20px', color: '#2e7d32', fontSize: '22px' }}>Select Language / भाषा चुनें</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '25px', maxHeight: '300px', overflowY: 'auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px', maxHeight: '300px', overflowY: 'auto' }}>
               {languages.map((l) => (
                 <button key={l.code} onClick={() => handleLanguageSelectFromButton(l.code)} style={{ padding: '12px', fontSize: '14px', cursor: 'pointer', background: l.code === lang ? '#a5d6a7' : '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', transition: 'background 0.2s', fontWeight: l.code === lang ? '600' : '400' }}>
                   {l.label}
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowLangModal(false)} style={{ padding: '10px 20px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>
-              Close
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
+              <input 
+                type="checkbox" 
+                id="saveDefaultAdmin" 
+                checked={saveDefault} 
+                onChange={(e) => setSaveDefault(e.target.checked)}
+                style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+              />
+              <label htmlFor="saveDefaultAdmin" style={{ cursor: 'pointer', fontSize: '13px', color: '#333' }}>
+                Save as default language
+              </label>
+            </div>
+            <button onClick={() => setShowLangModal(false)} style={{ padding: '10px 20px', background: '#2e7d32', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>
+              Continue
             </button>
           </div>
         </div>

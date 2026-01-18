@@ -13,7 +13,11 @@ const FarmerWrapper = ({ lang, setLang }) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [showLangModal, setShowLangModal] = useState(false);
+  const [showLangModal, setShowLangModal] = useState(() => {
+    const userSelected = localStorage.getItem('harvest_lang_selected');
+    return !userSelected;
+  });
+  const [saveDefault, setSaveDefault] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const auth = translations.auth?.[lang] || translations.auth?.en || {};
 
@@ -31,14 +35,28 @@ const FarmerWrapper = ({ lang, setLang }) => {
   useEffect(() => { if (isMobile) setIsSidebarOpen(false); }, [location, isMobile]);
 
   useEffect(() => {
-    if (!user || user.role !== 'farmer') navigate('/');
+    // Only redirect if user exists but has wrong role
+    if (user && user.role !== 'farmer') {
+      navigate('/');
+    }
   }, [user, navigate]);
+
+  // Listen for language changes from Settings or other components
+  useEffect(() => {
+    const handleLanguageChange = (e) => {
+      setLang(e.detail.lang);
+    };
+    window.addEventListener('languageChanged', handleLanguageChange);
+    return () => window.removeEventListener('languageChanged', handleLanguageChange);
+  }, []);
 
   const handleLogout = () => { logout(); navigate('/'); };
 
   const handleLanguageSelect = (newLang) => {
     setLang(newLang);
     localStorage.setItem('harvest_lang', newLang);
+    localStorage.setItem('harvest_lang_selected', 'true');
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: newLang } }));
     setShowLangModal(false);
   };
 
@@ -63,8 +81,6 @@ const FarmerWrapper = ({ lang, setLang }) => {
     }
   };
 
-  if (!user) return null;
-
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#f4f1ea' }}>
       {/* LANGUAGE MODAL */}
@@ -72,15 +88,27 @@ const FarmerWrapper = ({ lang, setLang }) => {
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
           <div style={{ background: 'white', padding: '30px', borderRadius: '16px', textAlign: 'center', width: '90%', maxWidth: '400px' }}>
             <h2 style={{ marginBottom: '20px', color: '#2e7d32', fontSize: '22px' }}>Select Language / भाषा चुनें</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '25px', maxHeight: '300px', overflowY: 'auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px', maxHeight: '300px', overflowY: 'auto' }}>
               {languages.map((l) => (
                 <button key={l.code} onClick={() => handleLanguageSelect(l.code)} style={{ padding: '12px', fontSize: '14px', cursor: 'pointer', background: l.code === lang ? '#a5d6a7' : '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', transition: 'background 0.2s', fontWeight: l.code === lang ? '600' : '400' }}>
                   {l.label}
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowLangModal(false)} style={{ padding: '10px 20px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>
-              Close
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
+              <input 
+                type="checkbox" 
+                id="saveDefaultFarmer" 
+                checked={saveDefault} 
+                onChange={(e) => setSaveDefault(e.target.checked)}
+                style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+              />
+              <label htmlFor="saveDefaultFarmer" style={{ cursor: 'pointer', fontSize: '13px', color: '#333' }}>
+                Save as default language
+              </label>
+            </div>
+            <button onClick={() => setShowLangModal(false)} style={{ padding: '10px 20px', background: '#2e7d32', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>
+              Continue
             </button>
           </div>
         </div>
@@ -164,16 +192,22 @@ const FarmerWrapper = ({ lang, setLang }) => {
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderLeft: '1px solid #eee', paddingLeft: '15px' }}>
-              <div style={{ fontSize: '12px' }}>
-                <div style={{ fontWeight: 'bold', color: '#333' }}>{user.name || 'User'}</div>
-                <div style={{ fontSize: '10px', color: '#999' }}>{user.email || user.role}</div>
-              </div>
-              <button onClick={() => setShowLangModal(true)} style={{ background: '#2e7d32', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#1b5e20'} onMouseOut={(e) => e.currentTarget.style.background = '#2e7d32'}>
-                <Globe size={14} /> {auth.changeLanguage || 'Language'}
-              </button>
-              <button onClick={handleLogout} style={{ background: '#d32f2f', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#b71c1c'} onMouseOut={(e) => e.currentTarget.style.background = '#d32f2f'}>
-                <LogOut size={14} /> {auth.logout || 'Logout'}
-              </button>
+              {user ? (
+                <>
+                  <div style={{ fontSize: '12px' }}>
+                    <div style={{ fontWeight: 'bold', color: '#333' }}>{user.name || 'User'}</div>
+                    <div style={{ fontSize: '10px', color: '#999' }}>{user.email || user.role}</div>
+                  </div>
+                  <button onClick={() => setShowLangModal(true)} style={{ background: '#2e7d32', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#1b5e20'} onMouseOut={(e) => e.currentTarget.style.background = '#2e7d32'}>
+                    <Globe size={14} /> {auth.changeLanguage || 'Language'}
+                  </button>
+                  <button onClick={handleLogout} style={{ background: '#d32f2f', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#b71c1c'} onMouseOut={(e) => e.currentTarget.style.background = '#d32f2f'}>
+                    <LogOut size={14} /> {auth.logout || 'Logout'}
+                  </button>
+                </>
+              ) : (
+                <div style={{ fontSize: '12px', color: '#999' }}>Loading...</div>
+              )}
             </div>
           </div>
         </div>
