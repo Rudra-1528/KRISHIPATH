@@ -10,26 +10,79 @@ import { db } from '../firebase';
 const AIChatButton = ({ lang: propLang }) => {
   const { notifications } = useNotifications();
   const { user } = useUser();
-  const [lang, setLang] = useState(propLang || localStorage.getItem('harvest_lang') || 'en');
+  const [lang, setLang] = useState(() => propLang || localStorage.getItem('harvest_lang') || 'en');
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const [shipments, setShipments] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [translatedActions, setTranslatedActions] = useState([]);
+  const [placeholderText, setPlaceholderText] = useState('Ask me anything...');
+  const [titleText, setTitleText] = useState('Harvest AI Assistant 🤖');
 
+  // Update lang when prop changes
   useEffect(() => {
-    setLang(propLang || localStorage.getItem('harvest_lang') || 'en');
+    const newLang = propLang || localStorage.getItem('harvest_lang') || 'en';
+    console.log('Language prop changed to:', newLang);
+    setLang(newLang);
   }, [propLang]);
   
-  // Initialize with translated greeting
+  // Quick action suggestions (English base)
+  const quickActions = [
+    { icon: '🚛', text: 'How many trucks?', originalText: 'How many trucks?', color: '#1976d2' },
+    { icon: '📍', text: 'Where is truck GJ-01?', originalText: 'Where is truck GJ-01?', color: '#388e3c' },
+    { icon: '🚨', text: 'Show alerts', originalText: 'Show alerts', color: '#d32f2f' },
+    { icon: '👥', text: 'Show all drivers', originalText: 'Show all drivers', color: '#7b1fa2' },
+    { icon: '📞', text: 'Driver phone numbers', originalText: 'Driver phone numbers', color: '#f57c00' },
+    { icon: '🌐', text: 'Help me change language', originalText: 'Help me change language', color: '#0288d1' }
+  ];
+
+  // Translate quick actions and UI text when language changes
+  useEffect(() => {
+    const translateUI = async () => {
+      console.log('Translating UI to language:', lang);
+      if (lang === 'en') {
+        setTranslatedActions(quickActions);
+        setPlaceholderText('Ask me anything...');
+        setTitleText('Harvest AI Assistant 🤖');
+      } else {
+        try {
+          const translated = await Promise.all(
+            quickActions.map(async (action) => ({
+              ...action,
+              text: await autoTranslate(action.text, lang),
+              originalText: action.originalText // Keep original English text
+            }))
+          );
+          console.log('Translated actions:', translated);
+          setTranslatedActions(translated);
+          const placeholder = await autoTranslate('Ask me anything...', lang);
+          const title = await autoTranslate('Harvest AI Assistant', lang) + ' 🤖';
+          console.log('Translated placeholder:', placeholder);
+          console.log('Translated title:', title);
+          setPlaceholderText(placeholder);
+          setTitleText(title);
+        } catch (error) {
+          console.error('Translation error:', error);
+          // Fallback to English if translation fails
+          setTranslatedActions(quickActions);
+          setPlaceholderText('Ask me anything...');
+          setTitleText('Harvest AI Assistant 🤖');
+        }
+      }
+    };
+    translateUI();
+  }, [lang]);
+
+  // Initialize with translated greeting - reinitialize when language changes
   useEffect(() => {
     const initGreeting = async () => {
-      const greeting = `Hello${user?.name ? ' ' + user.name : ''}! 👋 I can help you with:\n• Dashboard data (trucks, drivers, shipments)\n• Current locations\n• Alert summaries\n• Navigation help\n\nTry asking: "How many trucks?", "Where is truck GJ-01?", "Show alerts", "Help me change language"`;
+      const greeting = `Hello${user?.name ? ' ' + user.name : ''}! 👋 I can help you with:\n• Dashboard data (trucks, drivers, shipments)\n• Current locations\n• Alert summaries\n• Navigation help\n\nClick on any suggestion below or type your question:`;
       const translatedGreeting = lang === 'en' ? greeting : await autoTranslate(greeting, lang);
       setMessages([{ from: 'bot', text: translatedGreeting }]);
     };
-    if (messages.length === 0) initGreeting();
+    initGreeting(); // Remove the condition to reinitialize on every language change
   }, [lang, user]);
 
   // Listen to shipments data from Firebase
@@ -201,18 +254,39 @@ const AIChatButton = ({ lang: propLang }) => {
     return 'I can help with:\n🚛 Fleet info ("show all drivers")\n👤 Driver details ("who is driving GJ-01?")\n📍 Locations ("where is truck MH-12?")\n📞 Phone numbers ("phone number of driver")\n🚨 Alerts ("show latest alerts")\n💡 Help ("how to change language?")\n\nWhat would you like to know?';
   };
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    const userText = input.trim();
+  const handleSend = async (customText = null) => {
+    const textToSend = customText || input.trim();
+    if (!textToSend) return;
     setInput('');
-    appendMessage('user', userText);
+    appendMessage('user', textToSend);
 
     try {
-      const questionEn = lang === 'en' ? userText : await autoTranslate(userText, 'en');
+      const questionEn = lang === 'en' ? textToSend : await autoTranslate(textToSend, 'en');
       const answerEn = answerInEnglish(questionEn);
       await appendMessage('bot', answerEn);
     } catch (e) {
-      await appendMessage('bot', 'Sorry, I could not process that just now.');
+      const errorMsg = 'Sorry, I could not process that just now.';
+      const translatedError = lang === 'en' ? errorMsg : await autoTranslate(errorMsg, lang);
+      await appendMessage('bot', translatedError);
+    }
+  };
+
+  const handleQuickAction = async (action) => {
+    // Display the translated text to user, but send the original English text for processing
+    const displayText = action.text; // Already translated
+    const queryText = action.originalText; // Original English for processing
+    
+    // Show user message in current language
+    appendMessage('user', displayText);
+    
+    // Process using English query
+    try {
+      const answerEn = answerInEnglish(queryText);
+      await appendMessage('bot', answerEn);
+    } catch (e) {
+      const errorMsg = 'Sorry, I could not process that just now.';
+      const translatedError = lang === 'en' ? errorMsg : await autoTranslate(errorMsg, lang);
+      await appendMessage('bot', translatedError);
     }
   };
 
@@ -230,6 +304,11 @@ const AIChatButton = ({ lang: propLang }) => {
       appendMessage('bot', translatedError);
       return;
     }
+    
+    // Show listening message
+    const listeningMsg = 'Listening... Speak now in any language';
+    const translatedMsg = lang === 'en' ? listeningMsg : await autoTranslate(listeningMsg, lang);
+    appendMessage('bot', translatedMsg);
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     // Multi-language support: Try primary language first, fallback to others
@@ -302,7 +381,7 @@ const AIChatButton = ({ lang: propLang }) => {
           zIndex: 9999, display: 'flex', flexDirection: 'column', overflow: 'hidden'
         }}>
           <div style={{ background: '#2e7d32', color: 'white', padding: '15px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>Harvest AI Assistant 🤖</span>
+            <span>{titleText}</span>
             <span style={{ fontSize: '12px', opacity: 0.9 }}>{lang.toUpperCase()}</span>
           </div>
 
@@ -312,12 +391,64 @@ const AIChatButton = ({ lang: propLang }) => {
                 {m.text}
               </div>
             ))}
+            
+            {/* Quick Action Suggestions - Show only if user hasn't sent any messages */}
+            {messages.filter(m => m.from === 'user').length === 0 && (
+              <div style={{ marginTop: '15px' }}>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(2, 1fr)', 
+                  gap: '10px',
+                  marginTop: '10px'
+                }}>
+                  {(translatedActions.length > 0 ? translatedActions : quickActions).map((action, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleQuickAction(action)}
+                      style={{
+                        background: 'white',
+                        border: `2px solid ${action.color}`,
+                        borderRadius: '12px',
+                        padding: '12px 8px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.08)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '6px',
+                        textAlign: 'center',
+                        color: action.color,
+                        minHeight: '70px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = action.color;
+                        e.currentTarget.style.color = 'white';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'white';
+                        e.currentTarget.style.color = action.color;
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.08)';
+                      }}
+                    >
+                      <span style={{ fontSize: '20px' }}>{action.icon}</span>
+                      <span style={{ lineHeight: '1.2' }}>{action.text}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{ padding: '10px', borderTop: '1px solid #eee', display: 'flex', gap: '10px', alignItems: 'center' }}>
             <input
               type="text"
-              placeholder="Ask me anything..."
+              placeholder={placeholderText}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}

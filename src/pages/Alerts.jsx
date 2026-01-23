@@ -6,7 +6,7 @@ import { useNotifications } from '../NotificationContext';
 
 const Alerts = () => {
   const { lang, isMobile } = useOutletContext();
-    const t = translations.dashboard[lang] || translations.dashboard['en'];
+    const t = translations.alerts?.[lang] || translations.alerts?.['en'] || {};
     const dashAlert = (key) => translations.dashboard[lang]?.[key] || translations.dashboard['en']?.[key] || key;
     const { notifications } = useNotifications();
 
@@ -73,14 +73,18 @@ const Alerts = () => {
         <div style={{ background: 'white', borderRadius: '15px', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', flex: 1, overflowX: 'auto' }}>
             
             <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-                {['All', 'Critical', 'Resolved'].map(f => (
-                    <span key={f} onClick={() => setFilter(f)} style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: filter === f ? 'var(--primary-green)' : '#888', borderBottom: filter === f ? '3px solid var(--primary-green)' : 'none', paddingBottom: '5px' }}>{f}</span>
+                {[
+                  { key: 'All', label: t.allBtn || 'All' },
+                  { key: 'Critical', label: t.criticalBtn || 'Critical' },
+                  { key: 'Resolved', label: t.resolvedBtn || 'Resolved' }
+                ].map(f => (
+                    <span key={f.key} onClick={() => setFilter(f.key)} style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', color: filter === f.key ? 'var(--primary-green)' : '#888', borderBottom: filter === f.key ? '3px solid var(--primary-green)' : 'none', paddingBottom: '5px' }}>{f.label}</span>
                 ))}
             </div>
 
             <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
                 <thead style={{ background: '#f9f9f9' }}>
-                    <tr><th style={thStyle}>{t.type}</th><th style={thStyle}>Truck ID</th><th style={thStyle}>{t.val}</th><th style={thStyle}>{t.loc}</th><th style={thStyle}>{t.time}</th><th style={thStyle}>{t.status}</th></tr>
+                    <tr><th style={thStyle}>{t.tableType || 'Type'}</th><th style={thStyle}>{t.tableTruck || 'Truck ID'}</th><th style={thStyle}>{t.tableValue || 'Value'}</th><th style={thStyle}>{t.tableLocation || 'Location'}</th><th style={thStyle}>{t.tableTime || 'Time'}</th><th style={thStyle}>{t.tableStatus || 'Status'}</th></tr>
                 </thead>
                 <tbody>
                     {filteredAlerts.map(alert => (
