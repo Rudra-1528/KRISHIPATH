@@ -1,11 +1,27 @@
-import React from 'react';
-import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Map, TrendingUp, AlertTriangle, Settings, BarChart2, Truck } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Map, TrendingUp, AlertTriangle, Settings, BarChart2, Truck, BarChart3, Globe, LogOut } from 'lucide-react';
 import { translations } from '../translations';
+import { useUser } from '../UserContext';
+import TripHistory from './TripHistory';
 
 const Sidebar = ({ lang }) => {
   // Load translations based on selected language
   const t = translations.menu[lang] || translations.menu['en'];
+  const tripT = translations.tripHistory?.[lang] || translations.tripHistory?.en || {};
+
+  const navigate = useNavigate();
+  const { logout } = useUser();
+
+  const [showTripHistory, setShowTripHistory] = useState(false);
+  const [isPhone, setIsPhone] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => setIsPhone(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    onResize();
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const linkStyle = ({ isActive }) => ({
     display: 'flex', alignItems: 'center', padding: '10px 15px',
@@ -44,12 +60,28 @@ const Sidebar = ({ lang }) => {
             <BarChart2 size={18} style={{ marginRight: '10px' }} /> {t.analytics}
         </NavLink>
 
-        {/* 4. ROUTE ANALYSIS */}
+        {/* 4. TRIP HISTORY */}
+        <button
+          onClick={() => setShowTripHistory(true)}
+          style={{
+            ...linkStyle({}),
+            color: 'rgba(255, 255, 255, 0.7)',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'left',
+            width: '100%'
+          }}
+        >
+          <BarChart3 size={18} style={{ marginRight: '10px' }} /> {tripT.tripHistory || 'Trip History'}
+        </button>
+
+        {/* 5. ROUTE ANALYSIS */}
         <NavLink to="/routes" style={linkStyle}>
             <TrendingUp size={18} style={{ marginRight: '10px' }} /> {t.routes}
         </NavLink>
 
-        {/* 5. ALERTS */}
+        {/* 6. ALERTS */}
         <NavLink to="/alerts" style={linkStyle}>
             <AlertTriangle size={18} style={{ marginRight: '10px' }} /> {t.alerts}
         </NavLink>
@@ -60,10 +92,27 @@ const Sidebar = ({ lang }) => {
         <NavLink to="/settings" style={linkStyle}>
             <Settings size={18} style={{ marginRight: '10px' }} /> {t.settings}
         </NavLink>
+        {isPhone && (
+          <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            <button onClick={() => window.dispatchEvent(new Event('openLanguageModal'))} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}>
+              <Globe size={16} /> <span>{t.changeLanguage || 'Language'}</span>
+            </button>
+            <button onClick={() => { logout(); navigate('/'); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(211,47,47,0.9)', color: 'white', border: 'none', padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}>
+              <LogOut size={16} /> <span>{t.logout || 'Logout'}</span>
+            </button>
+          </div>
+        )}
         <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '15px', textAlign: 'center' }}>
             v1.0.4 | ESP32-WROOM
         </div>
       </div>
+
+      <TripHistory
+        isOpen={showTripHistory}
+        onClose={() => setShowTripHistory(false)}
+        lang={lang}
+        translations={translations}
+      />
     </div>
   );
 };

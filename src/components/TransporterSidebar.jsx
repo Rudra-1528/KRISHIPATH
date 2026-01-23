@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Map, BarChart2, TrendingUp, AlertTriangle, Settings, Truck, Globe, LogOut } from 'lucide-react';
+import { LayoutDashboard, Map, BarChart2, TrendingUp, AlertTriangle, Settings, Truck, Globe, LogOut, BarChart3 } from 'lucide-react';
 import { translations } from '../translations';
 import { useUser } from '../UserContext';
+import TripHistory from './TripHistory';
 
 const TransporterSidebar = ({ lang }) => {
   const t = translations.menu?.[lang] || translations.menu?.en || {};
+  const tripT = translations.tripHistory?.[lang] || translations.tripHistory?.en || {};
 
   const linkStyle = ({ isActive }) => ({
     display: 'flex', alignItems: 'center', padding: '10px 15px',
@@ -19,7 +21,9 @@ const TransporterSidebar = ({ lang }) => {
 
   const navigate = useNavigate();
   const { logout } = useUser();
+
   const [isPhone, setIsPhone] = useState(false);
+  const [showTripHistory, setShowTripHistory] = useState(false);
 
   useEffect(() => {
     const onResize = () => setIsPhone(window.innerWidth < 768);
@@ -44,6 +48,26 @@ const TransporterSidebar = ({ lang }) => {
         <NavLink to="/transporter-map" style={linkStyle}>
           <Map size={18} style={{ marginRight: '10px' }} /> {t.liveMap || 'Live Map'}
         </NavLink>
+        <button
+          onClick={() => setShowTripHistory(true)}
+          style={{
+            ...linkStyle({}),
+            color: 'rgba(255, 255, 255, 0.7)',
+            background: 'transparent',
+            border: 'none',
+            textAlign: 'left'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.color = '#ffffff';
+            e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.color = 'rgba(255, 255, 255, 0.7)';
+            e.target.style.background = 'transparent';
+          }}
+        >
+          <BarChart3 size={18} style={{ marginRight: '10px' }} /> {tripT.tripHistory || 'Trip History'}
+        </button>
         {/* <NavLink to="/transporter-analytics" style={linkStyle}>
           <BarChart2 size={18} style={{ marginRight: '10px' }} /> {t.analytics || 'Analytics'}
         </NavLink> */}
@@ -73,6 +97,14 @@ const TransporterSidebar = ({ lang }) => {
           v1.0.4 | Gaadi Maalik
         </div>
       </div>
+
+      {/* Trip History Modal */}
+      <TripHistory
+        isOpen={showTripHistory}
+        onClose={() => setShowTripHistory(false)}
+        lang={lang}
+        translations={translations}
+      />
     </div>
   );
 };
