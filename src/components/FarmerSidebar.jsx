@@ -1,7 +1,8 @@
-import React from 'react';
-import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Leaf, TrendingUp, AlertTriangle, Settings, Truck } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Leaf, TrendingUp, AlertTriangle, Settings, Truck, Globe, LogOut } from 'lucide-react';
 import { translations } from '../translations';
+import { useUser } from '../UserContext';
 
 const FarmerSidebar = ({ lang }) => {
   const t = translations.menu?.[lang] || translations.menu?.en || {};
@@ -15,6 +16,17 @@ const FarmerSidebar = ({ lang }) => {
     fontWeight: isActive ? '600' : '400', fontSize: '13px',
     borderLeft: isActive ? '4px solid #a5d6a7' : '4px solid transparent'
   });
+
+  const navigate = useNavigate();
+  const { logout } = useUser();
+  const [isPhone, setIsPhone] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => setIsPhone(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    onResize();
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   return (
     <div style={{ width: '85%', height: '100%', padding: '20px', display: 'flex', flexDirection: 'column', background: 'var(--sidebar-gradient)', color: 'white', overflowY: 'auto' }}>
@@ -44,6 +56,16 @@ const FarmerSidebar = ({ lang }) => {
         <NavLink to="/farmer-settings" style={linkStyle}>
           <Settings size={18} style={{ marginRight: '10px' }} /> {t.settings || 'Settings'}
         </NavLink>
+        {isPhone && (
+          <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            <button onClick={() => window.dispatchEvent(new Event('openLanguageModal'))} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}>
+              <Globe size={16} /> <span>{t.changeLanguage || 'Language'}</span>
+            </button>
+            <button onClick={() => { logout(); navigate('/'); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(211,47,47,0.9)', color: 'white', border: 'none', padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}>
+              <LogOut size={16} /> <span>{t.logout || 'Logout'}</span>
+            </button>
+          </div>
+        )}
         <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '15px', textAlign: 'center' }}>
           v1.0.4 | Kisan View
         </div>

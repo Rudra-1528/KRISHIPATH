@@ -23,13 +23,20 @@ const FarmerWrapper = ({ lang, setLang }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
+      const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       if (!mobile) setIsSidebarOpen(true); else setIsSidebarOpen(false);
     };
     window.addEventListener('resize', handleResize);
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Allow sidebar to trigger the language modal on mobile
+  useEffect(() => {
+    const openLang = () => setShowLangModal(true);
+    window.addEventListener('openLanguageModal', openLang);
+    return () => window.removeEventListener('openLanguageModal', openLang);
   }, []);
 
   useEffect(() => { if (isMobile) setIsSidebarOpen(false); }, [location, isMobile]);
@@ -82,7 +89,7 @@ const FarmerWrapper = ({ lang, setLang }) => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#f4f1ea' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden', background: '#f4f1ea' }}>
       {/* LANGUAGE MODAL */}
       {showLangModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
@@ -128,16 +135,16 @@ const FarmerWrapper = ({ lang, setLang }) => {
       )}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: '0' }}>
-        <div style={{ height: '65px', background: 'white', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', padding: '0 20px', justifyContent: 'space-between', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            {isMobile && <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><Menu size={28} color="var(--primary-green)" /></button>}
-            <h3 style={{ margin: 0, color: 'var(--primary-green)', fontSize: '18px', fontWeight: '800', letterSpacing: '0.5px' }}>Harvest Link - Kisan View</h3>
+        <div style={{ height: '65px', background: 'white', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', padding: isMobile ? '0 10px' : '0 20px', justifyContent: 'space-between', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>
+            {isMobile && <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><Menu size={26} color="var(--primary-green)" /></button>}
+            <h3 style={{ margin: 0, color: 'var(--primary-green)', fontSize: isMobile ? '16px' : '18px', fontWeight: '800', letterSpacing: '0.5px', maxWidth: isMobile ? '55vw' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Harvest Link - Kisan View</h3>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>
             <div style={{ position: 'relative' }}>
               <div onClick={() => setShowNotifications(!showNotifications)} style={{ cursor: 'pointer', color: '#5d4037', position: 'relative' }}>
-                <Bell size={22} />
+                <Bell size={isMobile ? 20 : 22} />
                 {unreadCount > 0 && (
                   <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#d32f2f', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold', border: '2px solid white' }}>
                     {unreadCount}
@@ -146,7 +153,7 @@ const FarmerWrapper = ({ lang, setLang }) => {
               </div>
 
               {showNotifications && (
-                <div style={{ position: 'absolute', top: '35px', right: '0', width: '350px', maxHeight: '400px', background: 'white', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, border: '1px solid #e0e0e0' }}>
+                <div style={{ position: 'absolute', top: '35px', right: '0', width: isMobile ? '92vw' : '350px', maxHeight: '400px', background: 'white', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, border: '1px solid #e0e0e0' }}>
                   <div style={{ padding: '15px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#333' }}>Notifications</h4>
                     <div style={{ display: 'flex', gap: '10px' }}>
@@ -191,9 +198,15 @@ const FarmerWrapper = ({ lang, setLang }) => {
                 </div>
               )}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderLeft: '1px solid #eee', paddingLeft: '15px' }}>
-              {user ? (
-                <>
+            {user && (
+              isMobile ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button onClick={() => setShowLangModal(true)} style={{ background: '#2e7d32', color: 'white', border: 'none', width: '34px', height: '34px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Globe size={18} />
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderLeft: '1px solid #eee', paddingLeft: '15px' }}>
                   <div style={{ fontSize: '12px' }}>
                     <div style={{ fontWeight: 'bold', color: '#333' }}>{user.name || 'User'}</div>
                     <div style={{ fontSize: '10px', color: '#999' }}>{user.email || user.role}</div>
@@ -204,11 +217,9 @@ const FarmerWrapper = ({ lang, setLang }) => {
                   <button onClick={handleLogout} style={{ background: '#d32f2f', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#b71c1c'} onMouseOut={(e) => e.currentTarget.style.background = '#d32f2f'}>
                     <LogOut size={14} /> {auth.logout || 'Logout'}
                   </button>
-                </>
-              ) : (
-                <div style={{ fontSize: '12px', color: '#999' }}>Loading...</div>
-              )}
-            </div>
+                </div>
+              )
+            )}
           </div>
         </div>
 

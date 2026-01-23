@@ -77,7 +77,7 @@ const Login = () => {
 			flexDirection: 'column',
 			alignItems: 'center',
 			justifyContent: 'center',
-			padding: '15px',
+			padding: 0,
 			fontFamily: 'Inter, sans-serif'
 		}}>
 			<div style={{
@@ -85,8 +85,9 @@ const Login = () => {
 				borderRadius: '16px',
 				boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
 				padding: isMobile ? '20px' : '40px',
-				maxWidth: isMobile ? '90%' : '500px',
-				width: '100%'
+				maxWidth: '500px',
+				width: isMobile ? 'calc(100% - 60px)' : '100%',
+				margin: isMobile ? '30px' : '15px'
 			}}>
 				<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
 					<Truck size={26} color="#2d5a27" />

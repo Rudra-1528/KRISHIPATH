@@ -26,7 +26,7 @@ const Layout = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024; // Treat tablets as mobile for sidebar logic
+      const mobile = window.innerWidth < 768; // Phones only
       setIsMobile(mobile);
       if (!mobile) setIsSidebarOpen(true); else setIsSidebarOpen(false);
     };
@@ -81,7 +81,7 @@ const Layout = () => {
   const handleLogout = () => { logout(); navigate('/'); };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#f4f1ea' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden', background: '#f4f1ea' }}>
       
       {/* LANGUAGE MODAL FOR BUTTON */}
       {showLangModal && (

@@ -23,10 +23,10 @@ const Landing = ({ setLang }) => {
   }, [setLang]);
 
   return (
-    <div style={pageStyle}>
+    <div style={pageStyle(isMobile)}>
       
       {/* UBL ROLE SELECTION */}
-      <div style={{...modalStyle, maxWidth: isMobile ? '90%' : '900px', width: '90%', padding: isMobile ? '20px' : '30px'}}>
+      <div style={{...modalStyle, maxWidth: '900px', width: isMobile ? 'calc(100% - 60px)' : '90%', padding: isMobile ? '20px' : '30px', margin: isMobile ? '30px' : '15px'}}>
         <h1 style={{ color: '#1b5e20', margin: '0 0 10px 0', fontSize: isMobile ? '20px' : '28px' }}>Harvest Link</h1>
         <p style={{ color: '#555', marginBottom: isMobile ? '15px' : '30px', fontSize: isMobile ? '12px' : '14px' }}>Unified Logistics Interface (UBL)</p>
         
@@ -62,7 +62,7 @@ const Landing = ({ setLang }) => {
   );
 };
 
-const pageStyle = { minHeight: '100vh', width: '100%', background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("/images/landing-bg.jpg")', backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px' };
+const pageStyle = (isMobile) => ({ minHeight: '100vh', width: '100%', background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("/images/landing-bg.jpg")', backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 });
 const modalStyle = { 
   background: 'linear-gradient(rgba(255,255,255,0.82), rgba(255,255,255,0.82)), url("/images/landing-bg.jpg")', 
   backgroundSize: 'cover', 
