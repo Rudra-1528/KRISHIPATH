@@ -152,16 +152,27 @@ const TransporterWrapper = ({ lang, setLang }) => {
                 )}
               </div>
 
+              {/* Mobile backdrop overlay */}
+              {showNotifications && isMobile && (
+                <div 
+                  onClick={() => setShowNotifications(false)} 
+                  style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 9999 }}
+                ></div>
+              )}
+
               {showNotifications && (
-                <div style={{ position: 'absolute', top: '35px', right: '0', width: isMobile ? '92vw' : '350px', maxHeight: '400px', background: 'white', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, border: '1px solid #e0e0e0' }}>
-                  <div style={{ padding: '15px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ position: 'absolute', top: '35px', right: isMobile ? '-10px' : '0', width: isMobile ? '92vw' : '350px', maxWidth: isMobile ? 'calc(100vw - 20px)' : '350px', maxHeight: '400px', background: 'white', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)', zIndex: 10000, border: '1px solid #e0e0e0', overflow: 'hidden' }}>
+                  <div style={{ padding: '15px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f5f5f5' }}>
                     <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#333' }}>Notifications</h4>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                       {notifications.length > 0 && (
                         <>
                           <button onClick={markAllAsRead} style={{ background: 'transparent', border: 'none', color: '#2e7d32', fontSize: '11px', cursor: 'pointer', fontWeight: '600' }}>Mark all read</button>
                           <button onClick={clearNotifications} style={{ background: 'transparent', border: 'none', color: '#d32f2f', fontSize: '11px', cursor: 'pointer', fontWeight: '600' }}>Clear all</button>
                         </>
+                      )}
+                      {isMobile && (
+                        <button onClick={() => setShowNotifications(false)} style={{ background: 'transparent', border: 'none', color: '#666', fontSize: '18px', cursor: 'pointer', fontWeight: 'bold', padding: '0 5px' }}>×</button>
                       )}
                     </div>
                   </div>
@@ -224,7 +235,7 @@ const TransporterWrapper = ({ lang, setLang }) => {
         </div>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '0' }}>
-          <Outlet context={{ lang, isMobile }} />
+          <Outlet context={{ lang, isMobile, isSidebarOpen }} />
         </div>
       </div>
     </div>

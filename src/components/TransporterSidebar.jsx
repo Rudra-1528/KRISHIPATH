@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Map, BarChart2, TrendingUp, AlertTriangle, Settings, Truck, Globe, LogOut, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Map, BarChart2, TrendingUp, AlertTriangle, Settings, Truck, Globe, LogOut, BarChart3, FileText } from 'lucide-react';
 import { translations } from '../translations';
 import { useUser } from '../UserContext';
 import TripHistory from './TripHistory';
@@ -73,6 +73,9 @@ const TransporterSidebar = ({ lang }) => {
         </NavLink> */}
         <NavLink to="/transporter-routes" style={linkStyle}>
           <TrendingUp size={18} style={{ marginRight: '10px' }} /> {t.routes || 'Routes'}
+        </NavLink>
+        <NavLink to="/transporter-documents" style={linkStyle}>
+          <FileText size={18} style={{ marginRight: '10px' }} /> {t.documents || 'Documents'}
         </NavLink>
         <NavLink to="/transporter-alerts" style={linkStyle}>
           <AlertTriangle size={18} style={{ marginRight: '10px' }} /> {t.alerts || 'Alerts'}

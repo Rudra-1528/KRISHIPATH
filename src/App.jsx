@@ -10,6 +10,8 @@ import Login from './pages/Login';
 import FarmerDashboard from './pages/FarmerDashboard';
 import DriverDashboard from './pages/DriverDashboard';
 import DriverNavigation from './pages/DriverNavigation';
+import DriverDocuments from './pages/DriverDocuments';
+import TransporterDocuments from './pages/TransporterDocuments';
 import AIChatButton from './components/AIChatButton';
 import TransporterAlerts from './pages/TransporterAlerts';
 
@@ -101,8 +103,7 @@ function App() {
           <Route element={<DriverWrapper lang={lang} setLang={updateLang} />}>
             <Route path="/driver" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
             <Route path="/driver-navigation" element={<RedirectToUBL lang={lang}><DriverNavigation /></RedirectToUBL>} />
-            <Route path="/driver-documents" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
-            <Route path="/driver-alerts" element={<RedirectToUBL lang={lang}><DriverDashboard /></RedirectToUBL>} />
+              <Route path="/driver-documents" element={<RedirectToUBL lang={lang}><DriverDocuments /></RedirectToUBL>} />
             <Route path="/driver-settings" element={<RedirectToUBL lang={lang}><Settings /></RedirectToUBL>} />
           </Route>
 
@@ -110,7 +111,8 @@ function App() {
             <Route path="/fleet-standalone" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
             <Route path="/transporter-map" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
             <Route path="/transporter-analytics" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
-            <Route path="/transporter-routes" element={<RedirectToUBL lang={lang}><Fleet /></RedirectToUBL>} />
+            <Route path="/transporter-routes" element={<RedirectToUBL lang={lang}><RouteAnalysis /></RedirectToUBL>} />
+            <Route path="/transporter-documents" element={<RedirectToUBL lang={lang}><TransporterDocuments /></RedirectToUBL>} />
             <Route path="/transporter-alerts" element={<RedirectToUBL lang={lang}><TransporterAlerts /></RedirectToUBL>} />
             <Route path="/transporter-settings" element={<RedirectToUBL lang={lang}><Settings /></RedirectToUBL>} />
           </Route>

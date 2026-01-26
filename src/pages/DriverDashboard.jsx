@@ -4,7 +4,9 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { FileText, Navigation, Zap, AlertCircle } from 'lucide-react';
 import L from 'leaflet';
-import RoutingMachine from '../RoutingMachine'; // Ensure you have this component
+import RoutingMachine from '../RoutingMachine';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 
 // --- ICONS ---
 // 1. My Truck (Green/Active)
@@ -29,7 +31,8 @@ const DriverDashboard = () => {
     
     // Toggle for Analysis Card
     const [showAnalysis, setShowAnalysis] = useState(true);
-    const { lang } = useOutletContext();
+    const { lang, isMobile, isSidebarOpen } = useOutletContext();
+    const [documents, setDocuments] = useState([]);
     
     // AI Route Intelligence State
     const [routeData, setRouteData] = useState({
@@ -132,6 +135,18 @@ const DriverDashboard = () => {
         };
     };
 
+    // Fetch documents from Firestore
+    useEffect(() => {
+        const unsubscribe = onSnapshot(collection(db, 'driver_documents'), (snapshot) => {
+            const docs = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setDocuments(docs.sort((a, b) => b.uploadedAt - a.uploadedAt));
+        });
+        return () => unsubscribe();
+    }, []);
+
     // Fetch real route data using OpenRouteService API
     useEffect(() => {
         // Initial calculation
@@ -149,6 +164,14 @@ const DriverDashboard = () => {
   const openPDF = () => {
     window.open("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", "_blank");
   };
+
+    // Default documents that should always be visible
+    const defaultDocs = [
+        { id: 'default-license', title: 'Driving License', status: 'Verified', color: '#2e7d32', onClick: openPDF },
+        { id: 'default-rc', title: 'Vehicle RC Book', status: 'Verified', color: '#2e7d32', onClick: openPDF },
+        { id: 'default-insurance', title: 'Insurance Policy', status: 'Valid', color: 'orange', onClick: openPDF },
+        { id: 'default-eway', title: 'E-Way Bill (Cargo)', status: 'Active', color: '#2e7d32', onClick: openPDF },
+    ];
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'white' }}>
@@ -180,22 +203,24 @@ const DriverDashboard = () => {
          </MapContainer>
          
          {/* -- FLOAT 1: HEADER -- */}
-         <div style={{ position: 'absolute', top: '20px', left: '15px', right: '15px', background: 'white', padding: '12px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ background: '#e8f5e9', padding: '10px', borderRadius: '50%' }}><Navigation color="#2e7d32" size={20} /></div>
-                <div>
-                   <div style={{ fontSize: '11px', color: '#666', fontWeight: 'bold', textTransform: 'uppercase' }}>Current Trip</div>
-                   <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#1b5e20' }}>Lavad → Gandhinagar</div>
+         {(!isMobile || !isSidebarOpen) && (
+         <div style={{ position: 'absolute', top: isMobile ? '10px' : '20px', left: isMobile ? '8px' : '15px', right: isMobile ? '8px' : '15px', background: 'white', padding: isMobile ? '10px' : '12px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: isMobile ? 'nowrap' : 'nowrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px', flex: 1, minWidth: 0 }}>
+                <div style={{ background: '#e8f5e9', padding: isMobile ? '8px' : '10px', borderRadius: '50%', flexShrink: 0 }}><Navigation color="#2e7d32" size={isMobile ? 16 : 20} /></div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                   <div style={{ fontSize: isMobile ? '9px' : '11px', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Current Trip</div>
+                   <div style={{ fontWeight: 'bold', fontSize: isMobile ? '12px' : '15px', color: '#1b5e20', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Lavad → Gandhinagar</div>
                 </div>
             </div>
-            <button onClick={() => setShowAnalysis(!showAnalysis)} style={{ background: '#333', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
+            <button onClick={() => setShowAnalysis(!showAnalysis)} style={{ background: '#333', color: 'white', border: 'none', padding: isMobile ? '5px 10px' : '6px 12px', borderRadius: '6px', fontSize: isMobile ? '10px' : '11px', fontWeight: 'bold', flexShrink: 0, marginLeft: '8px' }}>
                 {showAnalysis ? "Hide AI" : "Show AI"}
             </button>
          </div>
+         )}
 
          {/* -- FLOAT 2: AI ROUTE ANALYSIS (Admin Style Panel) -- */}
-         {showAnalysis && (
-             <div style={{ position: 'absolute', top: '90px', left: '15px', width: '280px', background: 'rgba(255, 255, 255, 0.98)', padding: '15px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', zIndex: 999, backdropFilter: 'blur(5px)', borderLeft: '5px solid #2e7d32', border: '1px solid rgba(0,0,0,0.1)' }}>
+         {showAnalysis && (!isMobile || !isSidebarOpen) && (
+             <div style={{ position: 'absolute', top: isMobile ? '70px' : '90px', left: isMobile ? '8px' : '15px', right: isMobile ? '8px' : 'auto', width: isMobile ? 'auto' : '280px', maxWidth: isMobile ? 'calc(100% - 16px)' : '280px', background: 'rgba(255, 255, 255, 0.98)', padding: isMobile ? '12px' : '15px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', zIndex: 999, backdropFilter: 'blur(5px)', borderLeft: '5px solid #2e7d32', border: '1px solid rgba(0,0,0,0.1)' }}>
                  
                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>
                      <Zap size={16} color="#f9a825" fill="#f9a825" />
@@ -240,10 +265,25 @@ const DriverDashboard = () => {
          </h2>
          
          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <DocCard title="Driving License" status="Verified" onClick={openPDF} />
-            <DocCard title="Vehicle RC Book" status="Verified" onClick={openPDF} />
-            <DocCard title="Insurance Policy" status="Valid" color="orange" onClick={openPDF} />
-            <DocCard title="E-Way Bill (Cargo)" status="Active" color="#2e7d32" onClick={openPDF} />
+                        {documents.map((doc) => (
+                            <DocCard 
+                                key={doc.id}
+                                title={doc.name} 
+                                status={doc.status || 'Active'}
+                                color={doc.color || '#2e7d32'}
+                                onClick={() => doc.fileURL && window.open(doc.fileURL, '_blank')} 
+                            />
+                        ))}
+
+                        {defaultDocs.map((doc) => (
+                            <DocCard 
+                                key={doc.id}
+                                title={doc.title} 
+                                status={doc.status}
+                                color={doc.color}
+                                onClick={doc.onClick} 
+                            />
+                        ))}
          </div>
       </div>
     </div>

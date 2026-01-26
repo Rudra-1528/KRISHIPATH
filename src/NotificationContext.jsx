@@ -206,7 +206,7 @@ export const NotificationProvider = ({ children }) => {
 
 	const filteredNotifications = useMemo(() => {
 		if (!user) return [];
-		if (user.role === 'farmer') return allNotifications.filter((n) => n.category === 'sensor');
+		if (user.role === 'farmer') return allNotifications; // Farmers see both sensor and fleet (connection) alerts
 		if (user.role === 'driver' || user.role === 'transporter') return allNotifications.filter((n) => n.category === 'fleet');
 		return allNotifications;
 	}, [allNotifications, user]);
