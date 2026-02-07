@@ -133,48 +133,53 @@ export const NotificationProvider = ({ children }) => {
 							buildNotification({
 								id: `temp-${truck}`,
 								type: 'temperature',
-									severity: 'critical',
-								})
-							);
-						}
+								category: 'sensor',
+								message: `High temperature ${temp}°C`,
+								value: `${temp}°C`,
+								severity: 'critical',
+							})
+						);
+					}
 
-						if (humidity < 40) {
-							incoming.push(
-								buildNotification({
-									id: `humidity-${truck}`,
-									type: 'humidity',
-									category: 'sensor',
-									message: `Low humidity ${humidity}%`,
-									value: `${humidity}%`,
-									severity: 'warning',
-								})
-							);
-						}
+					if (humidity < 30) {
+						incoming.push(
+							buildNotification({
+								id: `humidity-low-${truck}`,
+								type: 'humidity',
+								category: 'sensor',
+								message: `Low humidity ${humidity}%`,
+								value: `${humidity}%`,
+								severity: 'warning',
+							})
+						);
+					}
 
-						if (shockVal > 2) {
-							const shockStr = shockVal.toFixed ? shockVal.toFixed(2) : String(shockVal);
-							incoming.push(
-								buildNotification({
-									id: `shock-${truck}`,
-									type: 'shock',
-									category: 'sensor',
-									message: `High shock ${shockStr}G`,
-									value: `${shockStr}G`,
-									severity: 'critical',
-								})
-							);
-						}
-					});
+					if (humidity > 70) {
+						incoming.push(
+							buildNotification({
+								id: `humidity-high-${truck}`,
+								type: 'humidity',
+								category: 'sensor',
+								message: `High humidity ${humidity}%`,
+								value: `${humidity}%`,
+								severity: 'warning',
+							})
+						);
+					}
 
-					setAllNotifications((prev) => {
-						const merged = [...incoming, ...prev];
-						const unique = merged.filter((item, idx, arr) => idx === arr.findIndex((n) => n.id === item.id));
-						return unique.slice(0, 40);
-					});
-
-					// Send email once per new notification (per recipient)
-					const unsent = incoming.filter((n) => !sentEmailIds.has(n.id));
-					if (unsent.length) {
+					if (shockVal > 2) {
+						const shockStr = shockVal.toFixed ? shockVal.toFixed(2) : String(shockVal);
+						incoming.push(
+							buildNotification({
+								id: `shock-${truck}`,
+								type: 'shock',
+								category: 'sensor',
+								message: `High shock ${shockStr}G`,
+								value: `${shockStr}G`,
+								severity: 'critical',
+							})
+						);
+					}
 						const nextSet = new Set(sentEmailIds);
 						unsent.forEach((n) => {
 							sendEmailAlert(n, recipientEmail);
