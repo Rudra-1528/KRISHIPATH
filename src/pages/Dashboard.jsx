@@ -48,13 +48,22 @@ const toLatLng = (location, fallback) => {
     if (!location) return fallback;
     const lat = location.lat ?? location.latitude ?? location._lat ?? location._latitude;
     const lng = location.lng ?? location.lon ?? location.longitude ?? location._lng ?? location._longitude;
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-        return { lat: Number(lat), lng: Number(lng) };
+    const latNum = Number(lat);
+    const lngNum = Number(lng);
+    if (Number.isFinite(latNum) && Number.isFinite(lngNum)) {
+        return { lat: latNum, lng: lngNum };
     }
     return fallback;
 };
 
-const hasValidLatLng = (location) => Number.isFinite(location?.lat) && Number.isFinite(location?.lng);
+const hasValidLatLng = (location) => {
+    if (!location) return false;
+    const lat = location.lat ?? location.latitude ?? location._lat ?? location._latitude;
+    const lng = location.lng ?? location.lon ?? location.longitude ?? location._lng ?? location._longitude;
+    const latNum = Number(lat);
+    const lngNum = Number(lng);
+    return Number.isFinite(latNum) && Number.isFinite(lngNum);
+};
 
 // STATIC FLEET (Moved outside to prevent re-renders)
 const STATIC_FLEET = [
@@ -157,14 +166,18 @@ const Dashboard = () => {
   // 4. MEMOIZE ROUTE COORDINATES (Fixes the Flashing Map Issue)
   const routeStart = useMemo(() => {
       if (!hasValidLatLng(selectedTruck?.location)) return null;
-      return [selectedTruck.location.lat, selectedTruck.location.lng];
-  }, [selectedTruck?.location?.lat, selectedTruck?.location?.lng]);
+      const lat = selectedTruck.location.lat ?? selectedTruck.location.latitude ?? selectedTruck.location._lat ?? selectedTruck.location._latitude;
+      const lng = selectedTruck.location.lng ?? selectedTruck.location.lon ?? selectedTruck.location.longitude ?? selectedTruck.location._lng ?? selectedTruck.location._longitude;
+      return [Number(lat), Number(lng)];
+  }, [selectedTruck?.location?.lat, selectedTruck?.location?.latitude, selectedTruck?.location?.longitude, selectedTruck?.location?.lng]);
 
   const routeEnd = useMemo(() => {
       const coords = selectedTruck?.destCoords;
       if (!Array.isArray(coords) || coords.length !== 2) return null;
-      if (!Number.isFinite(coords[0]) || !Number.isFinite(coords[1])) return null;
-      return coords;
+      const latNum = Number(coords[0]);
+      const lngNum = Number(coords[1]);
+      if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) return null;
+      return [latNum, lngNum];
   }, [selectedTruck?.destCoords]);
 
   return (
@@ -188,22 +201,29 @@ const Dashboard = () => {
                     
                     {/* Auto-center map when truck moves */}
                     {hasValidLatLng(selectedTruck?.location) && (
-                        <RecenterMap lat={selectedTruck.location.lat} lng={selectedTruck.location.lng} />
+                        <RecenterMap 
+                            lat={selectedTruck.location.lat ?? selectedTruck.location.latitude ?? selectedTruck.location._lat ?? selectedTruck.location._latitude} 
+                            lng={selectedTruck.location.lng ?? selectedTruck.location.lon ?? selectedTruck.location.longitude ?? selectedTruck.location._lng ?? selectedTruck.location._longitude} 
+                        />
                     )}
 
-                    {trucks.filter((truck) => hasValidLatLng(truck.location)).map(truck => (
+                    {trucks.filter((truck) => hasValidLatLng(truck.location)).map(truck => {
+                        const lat = truck.location.lat ?? truck.location.latitude ?? truck.location._lat ?? truck.location._latitude;
+                        const lng = truck.location.lng ?? truck.location.lon ?? truck.location.longitude ?? truck.location._lng ?? truck.location._longitude;
+                        return (
                         <Marker 
                             key={truck.id} 
-                            position={[truck.location.lat, truck.location.lng]} 
+                            position={[Number(lat), Number(lng)]} 
                             icon={truck.isOffline ? truckIconOffline : truckIcon} 
                             eventHandlers={{ click: () => setSelectedTruckId(truck.id) }}
                         >
                             <Popup><strong>{truck.id}</strong><br/>{truck.status}</Popup>
                         </Marker>
-                    ))}
-                    
+                        );
+                    })}
+
                     {routeEnd && (
-                        <Marker position={selectedTruck.destCoords} icon={warehouseIcon}>
+                        <Marker position={routeEnd} icon={warehouseIcon}>
                             <Popup>Destination</Popup>
                         </Marker>
                     )}

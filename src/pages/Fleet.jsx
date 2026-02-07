@@ -39,8 +39,10 @@ const Fleet = () => {
     if (!location) return fallback;
     const lat = location.lat ?? location.latitude ?? location._lat ?? location._latitude;
     const lng = location.lng ?? location.lon ?? location.longitude ?? location._lng ?? location._longitude;
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      return `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}`;
+    const latNum = Number(lat);
+    const lngNum = Number(lng);
+    if (Number.isFinite(latNum) && Number.isFinite(lngNum)) {
+      return `${latNum.toFixed(4)}, ${lngNum.toFixed(4)}`;
     }
     return fallback;
   };

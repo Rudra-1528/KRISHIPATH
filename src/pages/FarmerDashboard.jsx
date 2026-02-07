@@ -115,8 +115,12 @@ const FarmerDashboard = () => {
 
   const heroPosition = useMemo(() => {
     const hero = liveDataMap["GJ-01-LIVE"] || {};
-    const lat = hero.lat ?? hero.latitude ?? hero.location?.lat ?? hero.location?.latitude ?? 23.076;
-    const lng = hero.lng ?? hero.lon ?? hero.longitude ?? hero.location?.lng ?? hero.location?.longitude ?? 72.846;
+    const lat = hero.lat ?? hero.latitude ?? hero._lat ?? hero._latitude 
+              ?? hero.location?.lat ?? hero.location?.latitude ?? hero.location?._lat ?? hero.location?._latitude 
+              ?? 23.076;
+    const lng = hero.lng ?? hero.lon ?? hero.longitude ?? hero._lng ?? hero._longitude 
+              ?? hero.location?.lng ?? hero.location?.lon ?? hero.location?.longitude ?? hero.location?._lng ?? hero.location?._longitude 
+              ?? 72.846;
     const safeLat = Number(lat) || 23.076;
     const safeLng = Number(lng) || 72.846;
     return [safeLat, safeLng];

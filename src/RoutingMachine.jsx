@@ -4,10 +4,15 @@ import L from "leaflet";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
-const isValidCoord = (coord) => Array.isArray(coord)
-  && coord.length === 2
-  && Number.isFinite(coord[0])
-  && Number.isFinite(coord[1]);
+const toNumberCoord = (coord) => {
+  if (!Array.isArray(coord) || coord.length !== 2) return null;
+  const lat = Number(coord[0]);
+  const lng = Number(coord[1]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return [lat, lng];
+};
+
+const isValidCoord = (coord) => Boolean(toNumberCoord(coord));
 
 const RoutingMachine = ({ start, end, serviceUrl }) => {
   const map = useMap();
@@ -56,13 +61,15 @@ const RoutingMachine = ({ start, end, serviceUrl }) => {
   useEffect(() => {
     const control = routingControlRef.current;
     if (!control || !control._map || control._map !== map) return;
-    if (!isValidCoord(start) || !isValidCoord(end)) return;
+    const startCoord = toNumberCoord(start);
+    const endCoord = toNumberCoord(end);
+    if (!startCoord || !endCoord) return;
 
-    const waypoints = [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])];
+    const waypoints = [L.latLng(startCoord[0], startCoord[1]), L.latLng(endCoord[0], endCoord[1])];
     try {
       control.setWaypoints(waypoints);
     } catch {}
-  }, [start, end]);
+  }, [start, end, map]);
 
   return null;
 };

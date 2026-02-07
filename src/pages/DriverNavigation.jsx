@@ -52,8 +52,12 @@ const DriverNavigation = () => {
   }, []);
 
   const heroPosition = useMemo(() => {
-    const lat = liveData.lat ?? liveData.latitude ?? liveData.location?.lat ?? 23.076;
-    const lng = liveData.lng ?? liveData.lon ?? liveData.longitude ?? liveData.location?.lng ?? 72.846;
+    const lat = liveData.lat ?? liveData.latitude ?? liveData._lat ?? liveData._latitude 
+              ?? liveData.location?.lat ?? liveData.location?.latitude ?? liveData.location?._lat ?? liveData.location?._latitude 
+              ?? 23.076;
+    const lng = liveData.lng ?? liveData.lon ?? liveData.longitude ?? liveData._lng ?? liveData._longitude 
+              ?? liveData.location?.lng ?? liveData.location?.lon ?? liveData.location?.longitude ?? liveData.location?._lng ?? liveData.location?._longitude 
+              ?? 72.846;
     const safeLat = Number(lat) || 23.076;
     const safeLng = Number(lng) || 72.846;
     return [safeLat, safeLng];
