@@ -35,6 +35,16 @@ const Fleet = () => {
   // FIX 1: Store raw data separately to prevent connection resets
   const [liveDataMap, setLiveDataMap] = useState({}); 
 
+  const toLatLngString = (location, fallback) => {
+    if (!location) return fallback;
+    const lat = location.lat ?? location.latitude ?? location._lat ?? location._latitude;
+    const lng = location.lng ?? location.lon ?? location.longitude ?? location._lng ?? location._longitude;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      return `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}`;
+    }
+    return fallback;
+  };
+
   const staticTrucks = [
     { 
       id: "VAC13143", 
@@ -114,7 +124,7 @@ const Fleet = () => {
         if (live) {
            status = isOffline ? "Signal Lost" : (live.status || "Moving");
            if (live.location) {
-             loc = `${live.location.lat.toFixed(4)}, ${live.location.lng.toFixed(4)}`;
+             loc = toLatLngString(live.location, t.defaultLocation);
            }
            bat = isOffline ? 0 : 85; 
            sig = isOffline ? "Offline" : "Strong";
@@ -137,7 +147,7 @@ const Fleet = () => {
         route: "Lavad → Gandhinagar",
         
         status: isHeroOffline ? "Signal Lost" : (heroLive?.status || "Active"),
-        location: heroLive && heroLive.location ? `${heroLive.location.lat.toFixed(4)}, ${heroLive.location.lng.toFixed(4)}` : "23.0760, 72.8460",
+        location: heroLive && heroLive.location ? toLatLngString(heroLive.location, "23.0760, 72.8460") : "23.0760, 72.8460",
         battery: isHeroOffline ? 0 : 92,
         signal: isHeroOffline ? "Offline" : "Strong"
       };

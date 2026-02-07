@@ -44,6 +44,18 @@ const warehouseIcon = new L.Icon({
 
 const WAREHOUSE_LOCATION = [23.215, 72.636]; 
 
+const toLatLng = (location, fallback) => {
+    if (!location) return fallback;
+    const lat = location.lat ?? location.latitude ?? location._lat ?? location._latitude;
+    const lng = location.lng ?? location.lon ?? location.longitude ?? location._lng ?? location._longitude;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        return { lat: Number(lat), lng: Number(lng) };
+    }
+    return fallback;
+};
+
+const hasValidLatLng = (location) => Number.isFinite(location?.lat) && Number.isFinite(location?.lng);
+
 // STATIC FLEET (Moved outside to prevent re-renders)
 const STATIC_FLEET = [
     { id: "VAC13143", startCity: "Mumbai", endCity: "Nashik", location: { lat: 19.2183, lng: 72.9781 }, destCoords: [19.9975, 73.7898] },
@@ -56,7 +68,9 @@ const STATIC_FLEET = [
 const RecenterMap = ({ lat, lng }) => {
     const map = useMap();
     useEffect(() => {
-        if(lat && lng) map.flyTo([lat, lng], map.getZoom());
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+            map.flyTo([lat, lng], map.getZoom());
+        }
     }, [lat, lng, map]);
     return null;
 };
@@ -106,7 +120,7 @@ const Dashboard = () => {
         return {
           ...t,
           status: live?.status || "Moving",
-          location: live?.location || t.location,
+          location: toLatLng(live?.location, t.location),
           sensors: live?.sensors || { temp: 24, humidity: 50 },
           shock: Math.min(live?.shock || 0.05, 2.5),
           rotation: live?.rotation || 0,
@@ -126,7 +140,7 @@ const Dashboard = () => {
         endCity: "Gandhinagar",
         destCoords: WAREHOUSE_LOCATION,
         status: isHeroOffline ? "Signal Lost" : (heroLive?.status || "Active"),
-        location: heroLive?.location || { lat: 23.076, lng: 72.846 },
+        location: toLatLng(heroLive?.location, { lat: 23.076, lng: 72.846 }),
         sensors: isHeroOffline ? { temp: 0, humidity: 0 } : (heroLive?.sensors || { temp: 0, humidity: 0 }),
         shock: isHeroOffline ? 0 : Math.min(heroLive?.shock || 0, 2.5),
         rotation: isHeroOffline ? 0 : (heroLive?.rotation || 0),
@@ -142,12 +156,15 @@ const Dashboard = () => {
 
   // 4. MEMOIZE ROUTE COORDINATES (Fixes the Flashing Map Issue)
   const routeStart = useMemo(() => {
-      if(!selectedTruck?.location) return null;
+      if (!hasValidLatLng(selectedTruck?.location)) return null;
       return [selectedTruck.location.lat, selectedTruck.location.lng];
   }, [selectedTruck?.location?.lat, selectedTruck?.location?.lng]);
 
   const routeEnd = useMemo(() => {
-      return selectedTruck?.destCoords || null;
+      const coords = selectedTruck?.destCoords;
+      if (!Array.isArray(coords) || coords.length !== 2) return null;
+      if (!Number.isFinite(coords[0]) || !Number.isFinite(coords[1])) return null;
+      return coords;
   }, [selectedTruck?.destCoords]);
 
   return (
@@ -170,11 +187,11 @@ const Dashboard = () => {
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     
                     {/* Auto-center map when truck moves */}
-                    {selectedTruck?.location && (
+                    {hasValidLatLng(selectedTruck?.location) && (
                         <RecenterMap lat={selectedTruck.location.lat} lng={selectedTruck.location.lng} />
                     )}
 
-                    {trucks.map(truck => (
+                    {trucks.filter((truck) => hasValidLatLng(truck.location)).map(truck => (
                         <Marker 
                             key={truck.id} 
                             position={[truck.location.lat, truck.location.lng]} 
@@ -185,7 +202,7 @@ const Dashboard = () => {
                         </Marker>
                     ))}
                     
-                    {selectedTruck && selectedTruck.destCoords && (
+                    {routeEnd && (
                         <Marker position={selectedTruck.destCoords} icon={warehouseIcon}>
                             <Popup>Destination</Popup>
                         </Marker>

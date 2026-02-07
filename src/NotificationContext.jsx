@@ -180,18 +180,29 @@ export const NotificationProvider = ({ children }) => {
 							})
 						);
 					}
-						const nextSet = new Set(sentEmailIds);
-						unsent.forEach((n) => {
-							sendEmailAlert(n, recipientEmail);
-							nextSet.add(n.id);
-						});
-						setSentEmailIds(nextSet);
-						try {
-							const key = `sent_email_ids_${recipientEmail || DEFAULT_EMAIL}`;
-							localStorage.setItem(key, JSON.stringify(Array.from(nextSet)));
-						} catch (e) {
-							console.warn('Could not persist sent email ids', e);
-						}
+				});
+
+				setAllNotifications((prev) => {
+					const merged = [...incoming, ...prev];
+					const unique = merged.filter((item, idx, arr) => idx === arr.findIndex((n) => n.id === item.id));
+					return unique.slice(0, 40);
+				});
+
+				// Send email for new/unsent notifications
+				const unsent = incoming.filter((n) => !sentEmailIds.has(n.id));
+				if (unsent.length) {
+					const nextSet = new Set(sentEmailIds);
+					unsent.forEach((n) => {
+						sendEmailAlert(n, recipientEmail);
+						nextSet.add(n.id);
+					});
+					setSentEmailIds(nextSet);
+					try {
+						const key = `sent_email_ids_${recipientEmail || DEFAULT_EMAIL}`;
+						localStorage.setItem(key, JSON.stringify(Array.from(nextSet)));
+					} catch (e) {
+						console.warn('Could not persist sent email ids', e);
+					}
 					}
 				} catch (err) {
 					console.warn('Snapshot processing failed:', err);

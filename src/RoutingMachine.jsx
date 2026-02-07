@@ -4,11 +4,16 @@ import L from "leaflet";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
+const isValidCoord = (coord) => Array.isArray(coord)
+  && coord.length === 2
+  && Number.isFinite(coord[0])
+  && Number.isFinite(coord[1]);
+
 const RoutingMachine = ({ start, end }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!map || !start || !end) return;
+    if (!map || !isValidCoord(start) || !isValidCoord(end)) return;
 
     const routingControl = L.Routing.control({
       waypoints: [
@@ -28,7 +33,16 @@ const RoutingMachine = ({ start, end }) => {
       createMarker: function() { return null; } 
     }).addTo(map);
 
-    return () => map.removeControl(routingControl);
+    return () => {
+      if (!routingControl) return;
+      try {
+        routingControl.remove();
+      } catch {
+        if (map && map.removeControl) {
+          map.removeControl(routingControl);
+        }
+      }
+    };
 
   }, [map, start, end]); // Re-draws whenever start/end changes
 
