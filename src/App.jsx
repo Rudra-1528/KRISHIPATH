@@ -15,6 +15,16 @@ import TransporterDocuments from './pages/TransporterDocuments';
 import AIChatButton from './components/AIChatButton';
 import TransporterAlerts from './pages/TransporterAlerts';
 
+// Conditional AIChatButton wrapper
+const ConditionalAIChatButton = ({ lang }) => {
+  const location = useLocation();
+  // Hide chat button on Landing and Login pages
+  if (location.pathname === '/' || location.pathname === '/login') {
+    return null;
+  }
+  return <AIChatButton lang={lang} />;
+};
+
 // UBL WRAPPERS
 import FarmerWrapper from './components/FarmerWrapper';
 import DriverWrapper from './components/DriverWrapper';
@@ -83,7 +93,7 @@ function App() {
     <BrowserRouter>
       <UserProvider>
         <NotificationProvider>
-          <AIChatButton lang={lang} />
+          <ConditionalAIChatButton lang={lang} />
 
           <Routes>
           <Route path="/" element={<Landing setLang={setLang} />} />
