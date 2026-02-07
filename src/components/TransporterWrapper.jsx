@@ -14,10 +14,11 @@ const TransporterWrapper = ({ lang, setLang }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [showLangModal, setShowLangModal] = useState(() => {
-    const userSelected = localStorage.getItem('harvest_lang_selected');
-    return !userSelected;
+    const langSet = localStorage.getItem('harvest_lang');
+    return !langSet; // Show modal if no language is set yet
   });
-  const [saveDefault, setSaveDefault] = useState(false);
+  const [selectedLangForModal, setSelectedLangForModal] = useState(null);
+  const [savedAsDefault, setSavedAsDefault] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const auth = translations.auth?.[lang] || translations.auth?.en || {};
 
@@ -37,6 +38,15 @@ const TransporterWrapper = ({ lang, setLang }) => {
     const openLang = () => setShowLangModal(true);
     window.addEventListener('openLanguageModal', openLang);
     return () => window.removeEventListener('openLanguageModal', openLang);
+  }, []);
+
+  // Force language modal to show on first visit to this domain
+  useEffect(() => {
+    const hasSelectedLang = localStorage.getItem('transporter_lang_modal_shown');
+    if (!hasSelectedLang) {
+      setShowLangModal(true);
+      localStorage.setItem('transporter_lang_modal_shown', 'true');
+    }
   }, []);
 
   useEffect(() => { if (isMobile) setIsSidebarOpen(false); }, [location, isMobile]);
@@ -60,10 +70,19 @@ const TransporterWrapper = ({ lang, setLang }) => {
   const handleLogout = () => { logout(); navigate('/'); };
 
   const handleLanguageSelect = (newLang) => {
+    setSelectedLangForModal(newLang);
     setLang(newLang);
     localStorage.setItem('harvest_lang', newLang);
-    localStorage.setItem('harvest_lang_selected', 'true');
-    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: newLang } }));
+    setSavedAsDefault(false);
+  };
+
+  const handleSaveAsDefault = () => {
+    localStorage.setItem('default_harvest_lang', selectedLangForModal);
+    setSavedAsDefault(true);
+  };
+
+  const handleContinue = () => {
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: selectedLangForModal || lang } }));
     setShowLangModal(false);
   };
 
@@ -97,24 +116,52 @@ const TransporterWrapper = ({ lang, setLang }) => {
             <h2 style={{ marginBottom: '20px', color: '#2e7d32', fontSize: '22px' }}>Select Language / भाषा चुनें</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px', maxHeight: '300px', overflowY: 'auto' }}>
               {languages.map((l) => (
-                <button key={l.code} onClick={() => handleLanguageSelect(l.code)} style={{ padding: '12px', fontSize: '14px', cursor: 'pointer', background: l.code === lang ? '#a5d6a7' : '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', transition: 'background 0.2s', fontWeight: l.code === lang ? '600' : '400' }}>
+                <button key={l.code} onClick={() => handleLanguageSelect(l.code)} style={{ padding: '12px', fontSize: '14px', cursor: 'pointer', background: selectedLangForModal === l.code ? '#a5d6a7' : '#f5f5f5', color: '#333', border: selectedLangForModal === l.code ? '2px solid #2e7d32' : 'none', borderRadius: '8px', transition: 'background 0.2s', fontWeight: selectedLangForModal === l.code ? '600' : '400' }}>
                   {l.label}
                 </button>
               ))}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
-              <input 
-                type="checkbox" 
-                id="saveDefaultTransporter" 
-                checked={saveDefault} 
-                onChange={(e) => setSaveDefault(e.target.checked)}
-                style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-              />
-              <label htmlFor="saveDefaultTransporter" style={{ cursor: 'pointer', fontSize: '13px', color: '#333' }}>
-                Save as default language
-              </label>
-            </div>
-            <button onClick={() => setShowLangModal(false)} style={{ padding: '10px 20px', background: '#2e7d32', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>
+            
+            {selectedLangForModal && (
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ margin: '10px 0', color: '#555', fontSize: '13px' }}>
+                  Selected: <strong>{languages.find(l => l.code === selectedLangForModal)?.label}</strong>
+                </p>
+                <button 
+                  onClick={handleSaveAsDefault} 
+                  style={{ 
+                    padding: '10px 20px', 
+                    background: savedAsDefault ? '#4caf50' : '#ff9800', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '6px', 
+                    cursor: 'pointer', 
+                    fontSize: '14px', 
+                    fontWeight: '600',
+                    marginBottom: '15px',
+                    width: '100%'
+                  }}
+                >
+                  {savedAsDefault ? '✓ Saved as Default' : 'Save as Default Language'}
+                </button>
+              </div>
+            )}
+            
+            <button 
+              onClick={handleContinue} 
+              disabled={!selectedLangForModal}
+              style={{ 
+                padding: '10px 20px', 
+                background: selectedLangForModal ? '#2e7d32' : '#ccc', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '6px', 
+                cursor: selectedLangForModal ? 'pointer' : 'not-allowed', 
+                fontSize: '14px', 
+                fontWeight: '600',
+                width: '100%'
+              }}
+            >
               Continue
             </button>
           </div>
