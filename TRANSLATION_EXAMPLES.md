@@ -268,4 +268,4 @@ console.log(findMissingTranslations('dashboard'));
 - **Telugu (తెలుగు)**: Primary in Telangana & Andhra Pradesh
 - **Bengali (বাংলা)**: Primary in West Bengal & Bangladesh
 
-All these are fully supported in Harvest Link! ✅
+All these are fully supported in KRISHIPATH! ✅

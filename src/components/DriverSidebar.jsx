@@ -34,7 +34,7 @@ const DriverSidebar = ({ lang }) => {
       <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>
         <h2 style={{ marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', letterSpacing: '0.5px', cursor: 'pointer' }}>
         <Truck size={24} color="#a5d6a7" />
-          <span>HARVEST<span style={{ fontWeight: '300', opacity: 0.8 }}>LINK</span></span>
+          <span>KRISHI<span style={{ fontWeight: '300', opacity: 0.8 }}>PATH</span></span>
         </h2>
       </Link>
 

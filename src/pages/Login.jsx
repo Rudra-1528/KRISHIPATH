@@ -91,7 +91,7 @@ const Login = () => {
 			}}>
 				<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
 					<Truck size={26} color="#2d5a27" />
-					<h1 style={{ color: 'var(--primary-green)', margin: 0, fontSize: isMobile ? '22px' : '26px', letterSpacing: '0.5px' }}>HARVEST<span style={{ fontWeight: '300', opacity: 0.8 }}>LINK</span></h1>
+					<h1 style={{ color: 'var(--primary-green)', margin: 0, fontSize: isMobile ? '22px' : '26px', letterSpacing: '0.5px' }}>KRISHI<span style={{ fontWeight: '300', opacity: 0.8 }}>PATH</span></h1>
 				</div>
 				<p style={{ color: '#555', margin: '0 0 25px 0', fontSize: isMobile ? '12px' : '14px', textAlign: 'center' }}>Unified Logistics Interface (UBL)</p>
 

@@ -27,7 +27,7 @@ const Landing = ({ setLang }) => {
       
       {/* UBL ROLE SELECTION */}
       <div style={{...modalStyle, maxWidth: '900px', width: isMobile ? 'calc(100% - 60px)' : '90%', padding: isMobile ? '20px' : '30px', margin: isMobile ? '30px' : '15px'}}>
-        <h1 style={{ color: '#1b5e20', margin: '0 0 10px 0', fontSize: isMobile ? '20px' : '28px' }}>Harvest Link</h1>
+        <h1 style={{ color: '#1b5e20', margin: '0 0 10px 0', fontSize: isMobile ? '20px' : '28px' }}>KRISHIPATH</h1>
         <p style={{ color: '#555', marginBottom: isMobile ? '15px' : '30px', fontSize: isMobile ? '12px' : '14px' }}>Unified Logistics Interface (UBL)</p>
         
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', gap: isMobile ? '12px' : '20px', width: '100%' }}>

@@ -146,7 +146,7 @@ const Layout = () => {
         <div style={{ height: '65px', background: 'white', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', padding: '0 20px', justifyContent: 'space-between', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             {isMobile && <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><Menu size={28} color="#2d5a27" /></button>}
-            <h3 style={{ margin: 0, color: '#2d5a27', fontSize: '18px', fontWeight: '800', letterSpacing: '0.5px' }}>Harvest Link</h3>
+            <h3 style={{ margin: 0, color: '#2d5a27', fontSize: '18px', fontWeight: '800', letterSpacing: '0.5px' }}>KRISHIPATH</h3>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>

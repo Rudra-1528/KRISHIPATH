@@ -26,7 +26,7 @@ const Analytics = () => {
     // Title
     doc.setFontSize(22);
     doc.setTextColor(45, 90, 39); // Green Color
-    doc.text("Harvest Link - Analytics Report", 20, 20);
+    doc.text("KRISHIPATH - Analytics Report", 20, 20);
     
     // Timestamp
     doc.setFontSize(10);

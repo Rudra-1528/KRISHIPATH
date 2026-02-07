@@ -20,7 +20,7 @@ For **Developers**: [Developer Guide](#-developer-quick-reference)
 
 1. **Open Your Dashboard**
    ```
-   Login → Click "HARVESTLINK" → Go to Farmer Dashboard
+   Login → Click "KRISHIPATH" → Go to Farmer Dashboard
    ```
 
 2. **Access Trip History**

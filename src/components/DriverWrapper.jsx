@@ -138,7 +138,7 @@ const DriverWrapper = ({ lang, setLang }) => {
         <div style={{ height: '65px', background: 'white', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', padding: isMobile ? '0 10px' : '0 20px', justifyContent: 'space-between', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>
             {isMobile && <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><Menu size={26} color="var(--primary-green)" /></button>}
-            <h3 style={{ margin: 0, color: 'var(--primary-green)', fontSize: isMobile ? '16px' : '18px', fontWeight: '800', letterSpacing: '0.5px', maxWidth: isMobile ? '55vw' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Harvest Link - Driver Bhai</h3>
+            <h3 style={{ margin: 0, color: 'var(--primary-green)', fontSize: isMobile ? '16px' : '18px', fontWeight: '800', letterSpacing: '0.5px', maxWidth: isMobile ? '55vw' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>KRISHIPATH - Driver Bhai</h3>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>

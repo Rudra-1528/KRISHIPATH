@@ -19,7 +19,7 @@ const AIChatButton = ({ lang: propLang }) => {
   const [messages, setMessages] = useState([]);
   const [translatedActions, setTranslatedActions] = useState([]);
   const [placeholderText, setPlaceholderText] = useState('Ask me anything...');
-  const [titleText, setTitleText] = useState('Harvest AI Assistant 🤖');
+  const [titleText, setTitleText] = useState('KRISHIPATH AI Assistant 🤖');
 
   // Update lang when prop changes
   useEffect(() => {
@@ -45,7 +45,7 @@ const AIChatButton = ({ lang: propLang }) => {
       if (lang === 'en') {
         setTranslatedActions(quickActions);
         setPlaceholderText('Ask me anything...');
-        setTitleText('Harvest AI Assistant 🤖');
+        setTitleText('KRISHIPATH AI Assistant 🤖');
       } else {
         try {
           const translated = await Promise.all(
@@ -58,7 +58,7 @@ const AIChatButton = ({ lang: propLang }) => {
           console.log('Translated actions:', translated);
           setTranslatedActions(translated);
           const placeholder = await autoTranslate('Ask me anything...', lang);
-          const title = await autoTranslate('Harvest AI Assistant', lang) + ' 🤖';
+          const title = await autoTranslate('KRISHIPATH AI Assistant', lang) + ' 🤖';
           console.log('Translated placeholder:', placeholder);
           console.log('Translated title:', title);
           setPlaceholderText(placeholder);
@@ -68,7 +68,7 @@ const AIChatButton = ({ lang: propLang }) => {
           // Fallback to English if translation fails
           setTranslatedActions(quickActions);
           setPlaceholderText('Ask me anything...');
-          setTitleText('Harvest AI Assistant 🤖');
+          setTitleText('KRISHIPATH AI Assistant 🤖');
         }
       }
     };

@@ -1,4 +1,4 @@
-# Harvest Link - Multi-Language Implementation Guide
+# KRISHIPATH - Multi-Language Implementation Guide
 
 ## Overview
 Complete multi-language support has been implemented across all pages. Users can now select from 8 languages and switch languages at any time.

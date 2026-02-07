@@ -50,7 +50,7 @@ const sendEmailAlert = async (notification, toEmail) => {
 				user_id: publicKey,
 				template_params: {
 					to_email: toEmail || DEFAULT_EMAIL,
-					subject: `Harvest Alert • ${notification.type || 'Alert'} • ${notification.truck || 'GJ-01-LIVE'}`,
+					subject: `KRISHIPATH Alert • ${notification.type || 'Alert'} • ${notification.truck || 'GJ-01-LIVE'}`,
 					message: notification.message || notification.value || 'New alert',
 					severity: notification.severity || 'info',
 					truck: notification.truck || 'GJ-01-LIVE',
@@ -126,16 +126,13 @@ export const NotificationProvider = ({ children }) => {
 						const sensors = data.sensors || {};
 						const temp = Number(sensors.temp ?? sensors.temperature ?? 0) || 0;
 						const humidity = Number(sensors.humidity ?? 100) || 100;
-						const shockVal = Number(data.shock ?? 0) || 0;
+					const shockVal = Math.min(Number(data.shock ?? 0) || 0, 2.5);
 
-						if (temp > 30) {
-							incoming.push(
-								buildNotification({
-									id: `temp-${truck}`,
-									type: 'temperature',
-									category: 'sensor',
-									message: `High temperature ${temp}°C`,
-									value: `${temp}°C`,
+					if (temp > 30) {
+						incoming.push(
+							buildNotification({
+								id: `temp-${truck}`,
+								type: 'temperature',
 									severity: 'critical',
 								})
 							);

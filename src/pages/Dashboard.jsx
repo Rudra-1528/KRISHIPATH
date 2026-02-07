@@ -108,7 +108,7 @@ const Dashboard = () => {
           status: live?.status || "Moving",
           location: live?.location || t.location,
           sensors: live?.sensors || { temp: 24, humidity: 50 },
-          shock: live?.shock || 0.05,
+          shock: Math.min(live?.shock || 0.05, 2.5),
           rotation: live?.rotation || 0,
           destCoords: t.destCoords,
           isOffline: false
@@ -128,7 +128,7 @@ const Dashboard = () => {
         status: isHeroOffline ? "Signal Lost" : (heroLive?.status || "Active"),
         location: heroLive?.location || { lat: 23.076, lng: 72.846 },
         sensors: isHeroOffline ? { temp: 0, humidity: 0 } : (heroLive?.sensors || { temp: 0, humidity: 0 }),
-        shock: isHeroOffline ? 0 : (heroLive?.shock || 0),
+        shock: isHeroOffline ? 0 : Math.min(heroLive?.shock || 0, 2.5),
         rotation: isHeroOffline ? 0 : (heroLive?.rotation || 0),
         isOffline: isHeroOffline
       };

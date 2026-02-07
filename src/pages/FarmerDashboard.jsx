@@ -83,7 +83,7 @@ const FarmerDashboard = () => {
           // Force Offline Values if Timed Out
           status: isOffline ? "Signal Lost" : (heroLive?.status || "Active"),
           sensors: isOffline ? { temp: 0, humidity: 0 } : (heroLive?.sensors || { temp: 0, humidity: 0 }),
-          shock: isOffline ? 0 : (heroLive?.shock || 0),
+          shock: isOffline ? 0 : Math.min(heroLive?.shock || 0, 2.5),
           
           isOffline: isOffline // Flag for styling
       };
