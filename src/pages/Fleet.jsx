@@ -183,7 +183,9 @@ const Fleet = () => {
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             
             {fleetData.map(truck => {
+              if (typeof truck.location !== 'string') return null;
               const coords = truck.location.split(',').map(c => parseFloat(c.trim()));
+              if (!Number.isFinite(coords[0]) || !Number.isFinite(coords[1])) return null;
               const isOffline = truck.signal === 'Offline';
               
               return (
